@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CloudMain Solutions | Azure Cloud Services</title>
+    <style>
+      :root {
+        --azure: #0f6cbd;
+        --azure-dark: #0a4e8c;
+        --background: #f6f8fb;
+        --text: #0f172a;
+        --muted: #4b5563;
+        --card: #ffffff;
+        --accent: #6dd3ff;
+        --shadow: 0 18px 45px rgba(15, 108, 189, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+        background: radial-gradient(circle at 20% 20%, rgba(109, 211, 255, 0.2), transparent 25%),
+          radial-gradient(circle at 80% 10%, rgba(15, 108, 189, 0.16), transparent 22%),
+          var(--background);
+        color: var(--text);
+        line-height: 1.6;
+      }
+
+      header {
+        position: sticky;
+        top: 0;
+        backdrop-filter: blur(12px);
+        background: rgba(246, 248, 251, 0.82);
+        border-bottom: 1px solid rgba(15, 108, 189, 0.1);
+        z-index: 100;
+      }
+
+      nav {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 16px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: var(--azure);
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        text-decoration: none;
+      }
+
+      .brand span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--azure), var(--accent));
+        color: #fff;
+        font-size: 22px;
+        box-shadow: var(--shadow);
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      .nav-links a {
+        color: var(--muted);
+        text-decoration: none;
+        font-weight: 600;
+        padding: 8px 12px;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+      }
+
+      .nav-links a:hover {
+        color: var(--azure);
+        background: rgba(15, 108, 189, 0.08);
+      }
+
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, var(--azure), var(--azure-dark));
+        color: #fff !important;
+        padding: 12px 16px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 700;
+        box-shadow: var(--shadow);
+      }
+
+      .cta svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .hero {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 80px 24px 72px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 36px;
+        align-items: center;
+      }
+
+      .hero h1 {
+        font-size: clamp(32px, 4vw + 8px, 52px);
+        margin: 0 0 16px;
+        line-height: 1.1;
+      }
+
+      .hero p {
+        margin: 0 0 24px;
+        color: var(--muted);
+        font-size: 17px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(15, 108, 189, 0.08);
+        color: var(--azure-dark);
+        padding: 10px 14px;
+        border-radius: 12px;
+        font-weight: 700;
+        margin-bottom: 14px;
+      }
+
+      .hero-card {
+        background: var(--card);
+        padding: 28px;
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(15, 108, 189, 0.08);
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 18px;
+        margin-top: 12px;
+      }
+
+      .metric {
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(15, 108, 189, 0.1);
+        border-radius: 14px;
+        padding: 14px 16px;
+      }
+
+      .metric strong {
+        font-size: 24px;
+        color: var(--azure);
+      }
+
+      section {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px 72px;
+      }
+
+      .section-header {
+        margin-bottom: 28px;
+      }
+
+      .section-header h2 {
+        margin: 0 0 10px;
+        font-size: 28px;
+      }
+
+      .section-header p {
+        margin: 0;
+        color: var(--muted);
+        max-width: 720px;
+      }
+
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 18px;
+      }
+
+      .card {
+        background: var(--card);
+        padding: 18px;
+        border-radius: 14px;
+        border: 1px solid rgba(15, 108, 189, 0.08);
+        box-shadow: 0 14px 32px rgba(15, 108, 189, 0.08);
+      }
+
+      .card h3 {
+        margin: 0 0 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 19px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(15, 108, 189, 0.1);
+        color: var(--azure-dark);
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 13px;
+        margin-right: 6px;
+      }
+
+      .list {
+        list-style: none;
+        padding: 0;
+        margin: 12px 0 0;
+        color: var(--muted);
+      }
+
+      .list li {
+        padding: 8px 0;
+        border-bottom: 1px dashed rgba(15, 108, 189, 0.1);
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .list li:last-child {
+        border-bottom: none;
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--azure);
+        display: inline-block;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 18px;
+      }
+
+      .process {
+        counter-reset: step;
+      }
+
+      .step {
+        counter-increment: step;
+        padding: 18px;
+        border-radius: 14px;
+        background: linear-gradient(180deg, #fff, #f8fbff);
+        border: 1px solid rgba(15, 108, 189, 0.1);
+      }
+
+      .step h4::before {
+        content: "0" counter(step);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        margin-right: 10px;
+        border-radius: 10px;
+        background: rgba(15, 108, 189, 0.12);
+        color: var(--azure);
+        font-weight: 700;
+      }
+
+      .cta-panel {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 18px;
+        align-items: center;
+        background: linear-gradient(135deg, #0f6cbd, #0a4e8c);
+        color: #fff;
+        padding: 26px;
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+      }
+
+      .cta-panel p {
+        margin: 0 0 12px;
+        opacity: 0.92;
+      }
+
+      footer {
+        background: #0b1b2d;
+        color: #dce5f5;
+        padding: 32px 24px;
+      }
+
+      footer .content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 18px;
+      }
+
+      footer a {
+        color: #dce5f5;
+        text-decoration: none;
+      }
+
+      @media (max-width: 700px) {
+        nav {
+          flex-wrap: wrap;
+        }
+        .nav-links {
+          width: 100%;
+          justify-content: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <nav>
+        <a class="brand" href="#">
+          <span>CM</span>
+          <div>
+            CloudMain <small style="display:block; color: var(--muted); font-weight: 600;">Azure Cloud Solutions</small>
+          </div>
+        </a>
+        <div class="nav-links">
+          <a href="#services">Services</a>
+          <a href="#process">Approach</a>
+          <a href="#outcomes">Outcomes</a>
+          <a class="cta" href="#contact">
+            Start a project
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14"></path>
+              <path d="m12 5 7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div>
+          <div class="badge">Azure-first, reliability obsessed</div>
+          <h1>Cloud excellence, engineered for velocity and resilience.</h1>
+          <p>
+            CloudMain Solutions designs, secures, and operates Azure environments so your teams can ship faster, stay compliant, and control costs.
+          </p>
+          <div class="metrics">
+            <div class="metric">
+              <strong>99.95%</strong>
+              <div>Targeted platform uptime across managed Azure workloads.</div>
+            </div>
+            <div class="metric">
+              <strong>40%</strong>
+              <div>Average savings from COGS optimization and right-sizing.</div>
+            </div>
+            <div class="metric">
+              <strong>2-4x</strong>
+              <div>Deployment frequency increase after CI/CD modernization.</div>
+            </div>
+          </div>
+        </div>
+        <div class="hero-card">
+          <h3 style="margin-top:0;">Your Azure command center</h3>
+          <ul class="list" style="margin-top:10px;">
+            <li><span class="dot"></span>Blueprinted landing zones with policy guardrails</li>
+            <li><span class="dot"></span>GitOps-ready AKS clusters and release pipelines</li>
+            <li><span class="dot"></span>Continuous cost, security, and reliability baselines</li>
+            <li><span class="dot"></span>Hands-on migration and day-2 operations</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="services">
+        <div class="section-header">
+          <h2>Azure services tailored to your roadmap</h2>
+          <p>From first landing zone to global-scale production, we build cloud foundations that stay compliant, observable, and cost-aware.</p>
+        </div>
+        <div class="cards">
+          <div class="card">
+            <h3>Azure CI/CD</h3>
+            <span class="pill">Pipelines</span><span class="pill">GitOps</span>
+            <ul class="list">
+              <li><span class="dot"></span>Azure DevOps &amp; GitHub Actions pipelines</li>
+              <li><span class="dot"></span>Automated testing, quality gates, and secrets hygiene</li>
+              <li><span class="dot"></span>Progressive delivery with blue/green and canary patterns</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Azure Kubernetes</h3>
+            <span class="pill">AKS</span><span class="pill">Platform</span>
+            <ul class="list">
+              <li><span class="dot"></span>AKS provisioning with secure baselines and node pools</li>
+              <li><span class="dot"></span>Ingress, autoscaling, and service mesh rollouts</li>
+              <li><span class="dot"></span>Observability with Azure Monitor, Prometheus, and Grafana</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>COGS review &amp; optimization</h3>
+            <span class="pill">FinOps</span><span class="pill">Governance</span>
+            <ul class="list">
+              <li><span class="dot"></span>Spend analysis with tagging, budgets, and anomaly alerts</li>
+              <li><span class="dot"></span>Right-sizing, reservations, and autoscale tuning</li>
+              <li><span class="dot"></span>Dashboarding for finance and engineering alignment</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Azure Security</h3>
+            <span class="pill">Zero Trust</span><span class="pill">Compliance</span>
+            <ul class="list">
+              <li><span class="dot"></span>Identity, access, and policy guardrails with Azure AD</li>
+              <li><span class="dot"></span>Security Center &amp; Defender posture management</li>
+              <li><span class="dot"></span>Threat modeling, runtime protection, and incident drills</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Azure Migrations</h3>
+            <span class="pill">Move</span><span class="pill">Modernize</span>
+            <ul class="list">
+              <li><span class="dot"></span>Assessments, landing zones, and network design</li>
+              <li><span class="dot"></span>Data, app, and container migration playbooks</li>
+              <li><span class="dot"></span>Post-cutover tuning and resilience validation</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Cloud operations</h3>
+            <span class="pill">SRE</span><span class="pill">Reliability</span>
+            <ul class="list">
+              <li><span class="dot"></span>SRE-led runbooks, on-call readiness, and SLIs/SLOs</li>
+              <li><span class="dot"></span>Backups, DR tests, and chaos readiness</li>
+              <li><span class="dot"></span>24/7 monitoring with actionable alert design</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="process">
+        <div class="section-header">
+          <h2>Delivery approach that keeps momentum</h2>
+          <p>We ship value in weeks, not months—pairing cloud blueprints with hands-on engineering to meet security and compliance gates.</p>
+        </div>
+        <div class="grid process">
+          <div class="step">
+            <h4>Discover &amp; align</h4>
+            <p>Architecture review, risk mapping, and success metrics to set a clear runway.</p>
+          </div>
+          <div class="step">
+            <h4>Design &amp; blueprint</h4>
+            <p>Landing zones, network topologies, and policies tailored to your org structure.</p>
+          </div>
+          <div class="step">
+            <h4>Build &amp; automate</h4>
+            <p>Infrastructure-as-code, pipelines, AKS platforms, and security controls delivered iteratively.</p>
+          </div>
+          <div class="step">
+            <h4>Operate &amp; optimize</h4>
+            <p>FinOps insights, SRE practices, and continuous hardening to keep your cloud efficient.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="outcomes">
+        <div class="section-header">
+          <h2>Reliable outcomes you can measure</h2>
+          <p>Actionable dashboards, SLIs/SLOs, and FinOps reporting keep stakeholders aligned and confident.</p>
+        </div>
+        <div class="cards">
+          <div class="card">
+            <h3>Operational clarity</h3>
+            <p style="color: var(--muted); margin: 8px 0 0;">Runbooks, observability baselines, and executive-ready reports.</p>
+          </div>
+          <div class="card">
+            <h3>Security by default</h3>
+            <p style="color: var(--muted); margin: 8px 0 0;">Identity-first controls, policy-driven guardrails, and zero-trust posture.</p>
+          </div>
+          <div class="card">
+            <h3>Cost visibility</h3>
+            <p style="color: var(--muted); margin: 8px 0 0;">Budget tracking, anomaly detection, and optimization playbooks.</p>
+          </div>
+          <div class="card">
+            <h3>Faster delivery</h3>
+            <p style="color: var(--muted); margin: 8px 0 0;">Automated CI/CD, resilient AKS, and compliant paths to production.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="contact">
+        <div class="cta-panel">
+          <div>
+            <h3 style="margin: 0 0 8px;">Ready to accelerate on Azure?</h3>
+            <p>Tell us about your roadmap—CI/CD, AKS, migrations, or cost optimization—and we’ll respond within one business day.</p>
+          </div>
+          <div>
+            <a class="cta" href="mailto:hello@cloudmainsolutions.com">hello@cloudmainsolutions.com</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="content">
+        <div>
+          <div class="brand" style="color:#dce5f5;">
+            <span>CM</span>
+            <div>
+              CloudMain Solutions
+              <small style="display:block; color: #8fb5e5; font-weight: 600;">Azure-first cloud partner</small>
+            </div>
+          </div>
+          <p style="margin: 12px 0 0; color: #afc7e8;">We engineer secure, scalable, and cost-aware Azure platforms with a delivery approach that matches your pace.</p>
+        </div>
+        <div>
+          <h4 style="margin: 0 0 8px; color: #fff;">Services</h4>
+          <ul style="list-style:none; padding:0; margin:0; color:#afc7e8;">
+            <li>Azure CI/CD modernization</li>
+            <li>Azure Kubernetes (AKS) platforms</li>
+            <li>COGS review &amp; FinOps</li>
+            <li>Security &amp; compliance hardening</li>
+            <li>Migrations and SRE operations</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="margin: 0 0 8px; color: #fff;">Contact</h4>
+          <p style="margin: 0 0 6px; color:#afc7e8;">Email: <a href="mailto:hello@cloudmainsolutions.com">hello@cloudmainsolutions.com</a></p>
+          <p style="margin: 0; color:#afc7e8;">Locations: Remote-first, North America &amp; Europe coverage</p>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
