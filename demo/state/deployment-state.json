@@ -1,0 +1,18 @@
+{
+  "USEA": {
+    "ring0": {
+      "version": "v1"
+    },
+    "ring1": {
+      "version": "v1"
+    }
+  },
+  "USWE": {
+    "ring0": {
+      "version": "v1"
+    },
+    "ring1": {
+      "version": "v1"
+    }
+  }
+}

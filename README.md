@@ -20,6 +20,51 @@ The site includes lightweight HTML structure checks using Node's built-in test r
 npm test
 ```
 
+## Retail observability demo
+
+The engineering demo lives under `demo/` and is separate from the CloudMain marketing site. It models a retail service deployed across two regions and two production rings:
+
+- `USEA/ring0` on port `3100` with 5% capacity
+- `USEA/ring1` on port `3101` with 45% capacity
+- `USWE/ring0` on port `3200` with 5% capacity
+- `USWE/ring1` on port `3201` with 45% capacity
+
+The service exposes:
+
+- `GET /items/:id` for `GetItem`
+- `POST /cart/items` for `AddItemToCart`
+- `POST /purchase` for `PurchaseItem`
+- `GET /metrics` for API, synthetic, dependency, and version metrics
+
+Start the demo services from the repository root:
+
+```bash
+npm run demo:init
+npm run demo:services
+```
+
+In a second terminal, run synthetic checkout traffic against all rings:
+
+```bash
+npm run demo:synthetic
+```
+
+To demonstrate a failed patch, run:
+
+```bash
+npm run demo:rollout:bad
+```
+
+The `v2-bad` patch intentionally breaks only `PurchaseItem`. `GetItem` and `AddItemToCart` continue to pass. The pipeline deploys to `USEA/ring0`, runs synthetic checkout traffic, reads `/metrics`, fails the health gate, stops rollout, and rolls the ring back to `v1`.
+
+To demonstrate a successful rollout:
+
+```bash
+npm run demo:rollout:good
+```
+
+The gate criteria are configured in `demo/config/topology.json`.
+
 ## Deploying to Azure Static Web Apps
 
 1. Create an Azure Static Web App and set the `AZURE_STATIC_WEB_APPS_API_TOKEN` secret in your repository settings.
