@@ -48,7 +48,10 @@ if (require.main === module) {
   const baseUrl = process.argv[2] || "http://localhost:3100";
   runCheckout(baseUrl).then((result) => {
     console.log(JSON.stringify(result, null, 2));
-    process.exit(result.ok ? 0 : 1);
+    process.exitCode = result.ok ? 0 : 1;
+  }).catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
   });
 }
 

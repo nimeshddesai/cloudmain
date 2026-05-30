@@ -39,7 +39,8 @@ async function main() {
       console.log(`[rollback] reverting ${ringKey(target)} to v1`);
       setRingVersion(target, "v1");
       await requestJson(`${baseUrl}/admin/metrics/reset`, { method: "POST" });
-      process.exit(1);
+      process.exitCode = 1;
+      return;
     }
 
     console.log(`[gate] ${ringKey(target)} healthy; proceeding`);
@@ -50,5 +51,5 @@ async function main() {
 
 main().catch((error) => {
   console.error(error);
-  process.exit(1);
+  process.exitCode = 1;
 });
