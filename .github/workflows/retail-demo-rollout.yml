@@ -1,4 +1,4 @@
-name: Retail Demo Rollout
+name: Retail Service Update
 
 on:
   workflow_dispatch:
