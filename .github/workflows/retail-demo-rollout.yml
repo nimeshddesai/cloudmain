@@ -1,4 +1,4 @@
-name: Retail Service Update
+name: Retail Service Patch
 
 on:
   workflow_dispatch:
@@ -12,7 +12,7 @@ on:
           - sliced
           - current
       patch_version:
-        description: "Demo version to deploy. Use v2-bad to fail PurchaseItem."
+        description: "Patch version to deploy. Use v2-bad to fail PurchaseItem."
         required: true
         default: "v2-bad"
         type: choice
@@ -36,19 +36,19 @@ env:
 
 jobs:
   rollout:
-    name: Build, deploy, gate, and rollback
+    name: Deploy retail service patch safely
     runs-on: ubuntu-latest
     environment: retail-demo
     steps:
-      - name: Checkout
+      - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Setup .NET
+      - name: Prepare .NET tooling
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
 
-      - name: Azure login
+      - name: Authenticate to Azure
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -58,7 +58,7 @@ jobs:
       - name: Ensure Azure Container Apps CLI support
         run: az extension add --name containerapp --upgrade
 
-      - name: Build and push image with ACR
+      - name: Build retail service patch image
         id: image
         shell: bash
         run: |
@@ -74,16 +74,15 @@ jobs:
 
           echo "image=$image" >> "$GITHUB_OUTPUT"
 
-      - name: Restore synthetic runner
+      - name: Prepare checkout validation
         run: dotnet restore demo-dotnet/src/SyntheticRunner/SyntheticRunner.csproj
 
-      - name: Roll out with synthetic health gates
+      - name: Deploy patch and validate checkout health
         shell: bash
         env:
           PATCH_IMAGE: ${{ steps.image.outputs.image }}
           PATCH_VERSION: ${{ inputs.patch_version }}
           ROLLOUT_MODE: ${{ inputs.rollout_mode }}
-          STABLE_IMAGE: ${{ inputs.stable_image }}
           SYNTHETIC_KEY: ${{ secrets.SYNTHETIC_KEY }}
         run: |
           set -euo pipefail
@@ -107,37 +106,53 @@ jobs:
             )
           fi
 
-          rollback_target() {
-            local app_name="$1"
-            echo "::warning::Rolling back $app_name to $STABLE_IMAGE with Demo__Version=v1"
-            az containerapp update \
-              --resource-group "$RESOURCE_GROUP" \
-              --name "$app_name" \
-              --image "$STABLE_IMAGE" \
-              --set-env-vars Demo__Version=v1
-          }
-
           for target in "${targets[@]}"; do
             IFS="|" read -r app_name slice capacity <<< "$target"
 
-            echo "Deploying $PATCH_VERSION to $app_name ($slice, ${capacity}% capacity)"
+            echo "::group::Deploy patch to $slice"
+            echo "Deploying retail service patch $PATCH_VERSION to $app_name ($slice, ${capacity}% capacity)"
             az containerapp update \
               --resource-group "$RESOURCE_GROUP" \
               --name "$app_name" \
               --image "$PATCH_IMAGE" \
               --set-env-vars Demo__Version="$PATCH_VERSION"
+            echo "::endgroup::"
 
-            echo "Running synthetic gate for $slice through Azure Front Door"
+            echo "::group::Validate checkout path in $slice"
+            echo "Running checkout validation for $slice through Azure Front Door"
             if ! dotnet run --project demo-dotnet/src/SyntheticRunner -- \
               --url "$FRONT_DOOR_URL" \
               --target-slice "$slice" \
               --synthetic-key "$SYNTHETIC_KEY"; then
-              echo "::error::Synthetic gate failed for $slice. Rollout stopped."
-              rollback_target "$app_name"
+              echo "::endgroup::"
+              echo "::error::Checkout validation failed for $slice. Patch rollout stopped before wider impact."
+              echo "FAILED_APP=$app_name" >> "$GITHUB_ENV"
+              echo "FAILED_SLICE=$slice" >> "$GITHUB_ENV"
+              echo "FAILED_CAPACITY=$capacity" >> "$GITHUB_ENV"
               exit 1
             fi
+            echo "::endgroup::"
 
-            echo "Synthetic gate passed for $slice"
+            echo "Checkout validation passed for $slice"
           done
 
-          echo "Rollout completed successfully."
+          echo "Retail service patch rollout completed successfully."
+
+      - name: Rollback failed rollout target
+        if: failure() && env.FAILED_APP != ''
+        shell: bash
+        env:
+          STABLE_IMAGE: ${{ inputs.stable_image }}
+        run: |
+          set -euo pipefail
+          echo "Rolling back $FAILED_SLICE (${FAILED_CAPACITY}% capacity target) to the known-good retail service image."
+          az containerapp update \
+            --resource-group "$RESOURCE_GROUP" \
+            --name "$FAILED_APP" \
+            --image "$STABLE_IMAGE" \
+            --set-env-vars Demo__Version=v1
+
+      - name: Stop patch rollout before wider impact
+        if: failure() && env.FAILED_APP != ''
+        run: |
+          echo "Retail service patch rollout stopped after failed checkout validation in $FAILED_SLICE."

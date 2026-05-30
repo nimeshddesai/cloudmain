@@ -117,7 +117,7 @@ Front Door origin groups, origins, routes, and protected synthetic routing rules
 
 ## GitHub Actions rollout pipeline
 
-The real rollout pipeline is defined in:
+The real retail service patch pipeline is defined in:
 
 ```text
 .github/workflows/retail-demo-rollout.yml
@@ -128,7 +128,7 @@ It is manually started from GitHub Actions and performs:
 - Build and push the retail service image to Azure Container Registry.
 - Deploy the patch to either the sliced or current topology.
 - Run synthetic checkout through Azure Front Door after each target.
-- Stop and roll back the failed target if the synthetic gate fails.
+- Stop and run a separate rollback task for the failed target if checkout validation fails.
 
 Required GitHub secrets:
 
@@ -161,6 +161,6 @@ eastus-ring0 deploys v2-bad
 GetItem passes
 AddItemToCart passes
 PurchaseItem fails
-pipeline rolls back eastus-ring0 to v1
-pipeline stops before eastus-ring1
+Rollback failed rollout target runs
+patch rollout stops before eastus-ring1
 ```
