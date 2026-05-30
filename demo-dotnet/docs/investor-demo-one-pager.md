@@ -59,7 +59,7 @@ flowchart LR
 
 ## Challenges In The Current Model
 
-If Patch 2 contains a Purchase bug and is deployed to East US first:
+If a service patch contains a Purchase bug and is deployed to East US first:
 
 ```text
 Catalog API: healthy
@@ -252,4 +252,3 @@ rollout_mode = service-rings
 patch = Patch 2
 rollback_on_failure = true
 ```
-
