@@ -1,0 +1,18 @@
+services:
+  retail-service:
+    build:
+      context: ..
+      dockerfile: demo-dotnet/src/RetailService/Dockerfile
+    environment:
+      Demo__Region: eastus
+      Demo__Slice: ring0
+      Demo__Version: v1
+    ports:
+      - "5081:8080"
+
+  status-page:
+    build:
+      context: ..
+      dockerfile: demo-dotnet/src/StatusPage/Dockerfile
+    ports:
+      - "5080:8080"

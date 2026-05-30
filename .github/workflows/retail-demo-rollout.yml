@@ -1,0 +1,143 @@
+name: Retail Demo Rollout
+
+on:
+  workflow_dispatch:
+    inputs:
+      rollout_mode:
+        description: "Rollout topology to use."
+        required: true
+        default: "sliced"
+        type: choice
+        options:
+          - sliced
+          - current
+      patch_version:
+        description: "Demo version to deploy. Use v2-bad to fail PurchaseItem."
+        required: true
+        default: "v2-bad"
+        type: choice
+        options:
+          - v2-bad
+          - v2
+      stable_image:
+        description: "Known-good service image used for rollback."
+        required: true
+        default: "acrretaildemo7txptnpdvdf3e.azurecr.io/retail-service:v1"
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  RESOURCE_GROUP: rg-cloudmain-retail-demo
+  ACR_NAME: acrretaildemo7txptnpdvdf3e
+  ACR_LOGIN_SERVER: acrretaildemo7txptnpdvdf3e.azurecr.io
+  FRONT_DOOR_URL: https://retail-retaildemo-bjg2ebhydwemckfr.z02.azurefd.net
+
+jobs:
+  rollout:
+    name: Build, deploy, gate, and rollback
+    runs-on: ubuntu-latest
+    environment: retail-demo
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Ensure Azure Container Apps CLI support
+        run: az extension add --name containerapp --upgrade
+
+      - name: Build and push image with ACR
+        id: image
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="retail-service:${GITHUB_SHA::12}"
+          image="$ACR_LOGIN_SERVER/$tag"
+
+          az acr build \
+            --registry "$ACR_NAME" \
+            --image "$tag" \
+            --file demo-dotnet/src/RetailService/Dockerfile \
+            .
+
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+
+      - name: Restore synthetic runner
+        run: dotnet restore demo-dotnet/src/SyntheticRunner/SyntheticRunner.csproj
+
+      - name: Roll out with synthetic health gates
+        shell: bash
+        env:
+          PATCH_IMAGE: ${{ steps.image.outputs.image }}
+          PATCH_VERSION: ${{ inputs.patch_version }}
+          ROLLOUT_MODE: ${{ inputs.rollout_mode }}
+          STABLE_IMAGE: ${{ inputs.stable_image }}
+          SYNTHETIC_KEY: ${{ secrets.SYNTHETIC_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "$SYNTHETIC_KEY" ]]; then
+            echo "SYNTHETIC_KEY secret is required."
+            exit 1
+          fi
+
+          if [[ "$ROLLOUT_MODE" == "current" ]]; then
+            targets=(
+              "ca-retaildemo-cur-eus|eastus|50"
+              "ca-retaildemo-cur-wus|westus|50"
+            )
+          else
+            targets=(
+              "ca-retaildemo-sl-eus-r0|eastus-ring0|5"
+              "ca-retaildemo-sl-eus-r1|eastus-ring1|45"
+              "ca-retaildemo-sl-wus-r0|westus-ring0|5"
+              "ca-retaildemo-sl-wus-r1|westus-ring1|45"
+            )
+          fi
+
+          rollback_target() {
+            local app_name="$1"
+            echo "::warning::Rolling back $app_name to $STABLE_IMAGE with Demo__Version=v1"
+            az containerapp update \
+              --resource-group "$RESOURCE_GROUP" \
+              --name "$app_name" \
+              --image "$STABLE_IMAGE" \
+              --set-env-vars Demo__Version=v1
+          }
+
+          for target in "${targets[@]}"; do
+            IFS="|" read -r app_name slice capacity <<< "$target"
+
+            echo "Deploying $PATCH_VERSION to $app_name ($slice, ${capacity}% capacity)"
+            az containerapp update \
+              --resource-group "$RESOURCE_GROUP" \
+              --name "$app_name" \
+              --image "$PATCH_IMAGE" \
+              --set-env-vars Demo__Version="$PATCH_VERSION"
+
+            echo "Running synthetic gate for $slice through Azure Front Door"
+            if ! dotnet run --project demo-dotnet/src/SyntheticRunner -- \
+              --url "$FRONT_DOOR_URL" \
+              --target-slice "$slice" \
+              --synthetic-key "$SYNTHETIC_KEY"; then
+              echo "::error::Synthetic gate failed for $slice. Rollout stopped."
+              rollback_target "$app_name"
+              exit 1
+            fi
+
+            echo "Synthetic gate passed for $slice"
+          done
+
+          echo "Rollout completed successfully."

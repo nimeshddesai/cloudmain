@@ -1,0 +1,9 @@
+**/bin/
+**/obj/
+.git/
+.github/
+.vs/
+**/.vs/
+node_modules/
+coverage/
+build/
