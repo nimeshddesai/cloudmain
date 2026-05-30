@@ -17,6 +17,9 @@
     "statusPageImage": {
       "value": "acrretaildemo7txptnpdvdf3e.azurecr.io/status-page:v1"
     },
+    "syntheticWorkerImage": {
+      "value": "acrretaildemo7txptnpdvdf3e.azurecr.io/synthetic-worker:v1"
+    },
     "syntheticKey": {
       "value": "replace-before-real-demo"
     }

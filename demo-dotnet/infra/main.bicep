@@ -15,6 +15,9 @@ param retailServiceImage string = 'mcr.microsoft.com/azuredocs/containerapps-hel
 @description('Container image for the status page.')
 param statusPageImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
 
+@description('Container image for the periodic synthetic worker.')
+param syntheticWorkerImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+
 @description('Synthetic key that protected Front Door routing will pass to app code in a later phase.')
 @secure()
 param syntheticKey string
@@ -28,6 +31,7 @@ var safeName = toLower(replace(environmentName, '-', ''))
 var logAnalyticsName = 'log-${safeName}'
 var appInsightsName = 'appi-${safeName}'
 var acrName = take('acr${safeName}${uniqueString(resourceGroup().id)}', 50)
+var storageAccountName = take('st${safeName}${uniqueString(resourceGroup().id)}', 24)
 var eastEnvName = 'cae-${safeName}-eastus'
 var westEnvName = 'cae-${safeName}-westus'
 var frontDoorProfileName = 'afd-${safeName}'
@@ -67,6 +71,23 @@ resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
     adminUserEnabled: true
   }
 }
+
+resource statusStorage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
+  name: storageAccountName
+  location: eastLocation
+  tags: tags
+  sku: {
+    name: 'Standard_LRS'
+  }
+  kind: 'StorageV2'
+  properties: {
+    allowBlobPublicAccess: false
+    minimumTlsVersion: 'TLS1_2'
+    supportsHttpsTrafficOnly: true
+  }
+}
+
+var statusStorageConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${statusStorage.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${statusStorage.listKeys().keys[0].value}'
 
 resource eastEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' = {
   name: eastEnvName
@@ -202,13 +223,83 @@ resource statusPageApp 'Microsoft.App/containerApps@2024-03-01' = {
   })
   properties: {
     managedEnvironmentId: eastEnvironment.id
-    configuration: containerAppConfiguration(syntheticKey, acr.properties.loginServer, acr.listCredentials().username, acr.listCredentials().passwords[0].value)
+    configuration: statusPageConfiguration(syntheticKey, statusStorageConnectionString, acr.properties.loginServer, acr.listCredentials().username, acr.listCredentials().passwords[0].value)
     template: {
       containers: [
         {
           name: 'status-page'
           image: statusPageImage
           env: [
+            {
+              name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+              value: appInsights.properties.ConnectionString
+            }
+            {
+              name: 'StatusStorage__ConnectionString'
+              secretRef: 'status-storage-connection'
+            }
+            {
+              name: 'StatusStorage__Container'
+              value: 'status'
+            }
+            {
+              name: 'StatusStorage__Blob'
+              value: 'public-status.json'
+            }
+          ]
+          resources: {
+            cpu: json('0.25')
+            memory: '0.5Gi'
+          }
+        }
+      ]
+      scale: {
+        minReplicas: 0
+        maxReplicas: 1
+      }
+    }
+  }
+}
+
+resource syntheticWorkerApp 'Microsoft.App/containerApps@2024-03-01' = {
+  name: 'ca-${safeName}-synthetic'
+  location: eastLocation
+  tags: union(tags, {
+    demoMode: 'synthetic'
+  })
+  properties: {
+    managedEnvironmentId: eastEnvironment.id
+    configuration: syntheticWorkerConfiguration(syntheticKey, statusStorageConnectionString, acr.properties.loginServer, acr.listCredentials().username, acr.listCredentials().passwords[0].value)
+    template: {
+      containers: [
+        {
+          name: 'synthetic-worker'
+          image: syntheticWorkerImage
+          env: [
+            {
+              name: 'FRONT_DOOR_URL'
+              value: 'https://${frontDoorEndpoint.properties.hostName}'
+            }
+            {
+              name: 'SYNTHETIC_KEY'
+              secretRef: 'synthetic-key'
+            }
+            {
+              name: 'STATUS_STORAGE_CONNECTION_STRING'
+              secretRef: 'status-storage-connection'
+            }
+            {
+              name: 'STATUS_CONTAINER'
+              value: 'status'
+            }
+            {
+              name: 'STATUS_BLOB'
+              value: 'public-status.json'
+            }
+            {
+              name: 'CHECK_INTERVAL_SECONDS'
+              value: '30'
+            }
             {
               name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
               value: appInsights.properties.ConnectionString
@@ -221,7 +312,7 @@ resource statusPageApp 'Microsoft.App/containerApps@2024-03-01' = {
         }
       ]
       scale: {
-        minReplicas: 0
+        minReplicas: 1
         maxReplicas: 1
       }
     }
@@ -261,6 +352,62 @@ func containerAppConfiguration(key string, registryServer string, registryUserna
     {
       name: 'synthetic-key'
       value: key
+    }
+    {
+      name: 'acr-password'
+      value: registryPassword
+    }
+  ]
+  registries: [
+    {
+      server: registryServer
+      username: registryUsername
+      passwordSecretRef: 'acr-password'
+    }
+  ]
+}
+
+func statusPageConfiguration(key string, statusConnectionString string, registryServer string, registryUsername string, registryPassword string) object => {
+  activeRevisionsMode: 'Single'
+  ingress: {
+    external: true
+    targetPort: 8080
+    transport: 'auto'
+    allowInsecure: false
+  }
+  secrets: [
+    {
+      name: 'synthetic-key'
+      value: key
+    }
+    {
+      name: 'status-storage-connection'
+      value: statusConnectionString
+    }
+    {
+      name: 'acr-password'
+      value: registryPassword
+    }
+  ]
+  registries: [
+    {
+      server: registryServer
+      username: registryUsername
+      passwordSecretRef: 'acr-password'
+    }
+  ]
+}
+
+func syntheticWorkerConfiguration(key string, statusConnectionString string, registryServer string, registryUsername string, registryPassword string) object => {
+  activeRevisionsMode: 'Single'
+  secrets: [
+    {
+      name: 'synthetic-key'
+      value: key
+    }
+    {
+      name: 'status-storage-connection'
+      value: statusConnectionString
     }
     {
       name: 'acr-password'
@@ -316,6 +463,7 @@ func containerAppTemplate(image string, region string, slice string, version str
 }
 
 output acrLoginServer string = acr.properties.loginServer
+output statusStorageAccountName string = statusStorage.name
 output appInsightsConnectionString string = appInsights.properties.ConnectionString
 output frontDoorEndpointHostName string = frontDoorEndpoint.properties.hostName
 output currentEastFqdn string = currentEastApp.properties.configuration.ingress.fqdn
@@ -325,3 +473,4 @@ output slicedEastRing1Fqdn string = slicedEastRing1App.properties.configuration.
 output slicedWestRing0Fqdn string = slicedWestRing0App.properties.configuration.ingress.fqdn
 output slicedWestRing1Fqdn string = slicedWestRing1App.properties.configuration.ingress.fqdn
 output statusPageFqdn string = statusPageApp.properties.configuration.ingress.fqdn
+output syntheticWorkerName string = syntheticWorkerApp.name

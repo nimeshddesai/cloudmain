@@ -3,74 +3,34 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CloudMain Retail Availability</title>
+  <title>CloudMain Retail Service Status</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
   <main class="shell">
-    <header class="topbar">
+    <header class="page-header">
       <div>
-        <p class="eyebrow">CloudMain Retail Demo</p>
-        <h1>Service Availability</h1>
+        <p class="eyebrow">CloudMain Retail</p>
+        <h1>Service Status</h1>
       </div>
-      <div class="mode-controls" aria-label="Deployment mode">
-        <button class="mode-button active" type="button" data-mode="current">Current</button>
-        <button class="mode-button" type="button" data-mode="sliced">Sliced</button>
-      </div>
+      <span id="last-updated" class="timestamp">Checking status...</span>
     </header>
 
-    <section class="status-band" aria-live="polite">
+    <section id="summary" class="summary operational" aria-live="polite">
+      <span class="status-dot" aria-hidden="true"></span>
       <div>
-        <p class="status-label">Overall status</p>
+        <p class="summary-label">Current status</p>
         <h2 id="overall-status">All Systems Operational</h2>
-        <p id="status-detail">All retail APIs and synthetic checkout are healthy.</p>
-      </div>
-      <div class="impact">
-        <span id="impact-value">0%</span>
-        <span>capacity impacted</span>
+        <p id="overall-detail">Retail services are operating normally.</p>
       </div>
     </section>
 
-    <section class="scenario-strip" aria-label="Scenario">
-      <button class="scenario-button active" type="button" data-scenario="healthy">Healthy</button>
-      <button class="scenario-button" type="button" data-scenario="bad">Bad Patch</button>
-      <button class="scenario-button" type="button" data-scenario="recovered">Recovered</button>
-    </section>
-
-    <section class="grid two">
-      <div class="panel">
-        <div class="panel-heading">
-          <h3>Retail APIs</h3>
-          <span id="api-summary" class="pill good">Healthy</span>
-        </div>
-        <div id="api-list" class="component-list"></div>
+    <section class="status-card" aria-label="Service components">
+      <div class="status-card-heading">
+        <h3>Components</h3>
+        <span id="window-label">Last 30 minutes</span>
       </div>
-
-      <div class="panel">
-        <div class="panel-heading">
-          <h3 id="topology-title">Regional Health</h3>
-          <span id="topology-summary" class="pill good">2 of 2 healthy</span>
-        </div>
-        <div id="topology-list" class="component-list"></div>
-      </div>
-    </section>
-
-    <section class="grid two">
-      <div class="panel">
-        <div class="panel-heading">
-          <h3>Synthetic Checkout</h3>
-          <span id="synthetic-summary" class="pill good">Passing</span>
-        </div>
-        <ol id="synthetic-list" class="step-list"></ol>
-      </div>
-
-      <div class="panel">
-        <div class="panel-heading">
-          <h3>Deployment Activity</h3>
-          <span id="deployment-summary" class="pill neutral">Idle</span>
-        </div>
-        <ol id="timeline" class="timeline"></ol>
-      </div>
+      <div id="component-list" class="component-list"></div>
     </section>
   </main>
 

@@ -17,6 +17,9 @@
     "statusPageImage": {
       "value": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
     },
+    "syntheticWorkerImage": {
+      "value": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+    },
     "syntheticKey": {
       "value": "replace-with-demo-secret"
     }

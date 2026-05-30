@@ -1,279 +1,134 @@
-const state = {
-  mode: "current",
-  scenario: "healthy"
-};
-
-const data = {
-  current: {
-    title: "Regional Health",
-    healthy: {
-      overall: "All Systems Operational",
-      detail: "East US and West US are serving checkout traffic normally.",
-      impact: "0%",
-      band: "healthy",
-      deployment: "Idle",
-      apis: [
-        ["GetItem", "Operational", "99.99%"],
-        ["AddItemToCart", "Operational", "99.98%"],
-        ["PurchaseItem", "Operational", "99.97%"]
-      ],
-      topology: [
-        ["East US", "Operational", "50% capacity"],
-        ["West US", "Operational", "50% capacity"]
-      ],
-      synthetic: [
-        ["GetItem", "Passed", "200"],
-        ["AddItemToCart", "Passed", "200"],
-        ["PurchaseItem", "Passed", "200"]
-      ],
-      timeline: [
-        ["No active deployment", "Traffic is balanced across both regions."]
-      ]
-    },
-    bad: {
-      overall: "Partial Outage",
-      detail: "A bad patch in East US is breaking checkout while catalog and cart APIs remain available.",
-      impact: "50%",
-      band: "outage",
-      deployment: "Rollback",
-      apis: [
-        ["GetItem", "Operational", "99.99%"],
-        ["AddItemToCart", "Operational", "99.98%"],
-        ["PurchaseItem", "Partial Outage", "0.00% in East US"]
-      ],
-      topology: [
-        ["East US", "Partial Outage", "50% impacted"],
-        ["West US", "Operational", "50% healthy"]
-      ],
-      synthetic: [
-        ["GetItem", "Passed", "200"],
-        ["AddItemToCart", "Passed", "200"],
-        ["PurchaseItem", "Failed", "500"]
-      ],
-      timeline: [
-        ["v2-bad deployed to East US", "Regional rollout exposes 50% capacity."],
-        ["Synthetic checkout failed", "PurchaseItem returned HTTP 500."],
-        ["Rollback started", "Pipeline stopped before West US."]
-      ]
-    },
-    recovered: {
-      overall: "All Systems Operational",
-      detail: "East US has rolled back to v1 and checkout has recovered.",
-      impact: "0%",
-      band: "healthy",
-      deployment: "Recovered",
-      apis: [
-        ["GetItem", "Operational", "99.99%"],
-        ["AddItemToCart", "Operational", "99.98%"],
-        ["PurchaseItem", "Operational", "99.96%"]
-      ],
-      topology: [
-        ["East US", "Operational", "50% capacity"],
-        ["West US", "Operational", "50% capacity"]
-      ],
-      synthetic: [
-        ["GetItem", "Passed", "200"],
-        ["AddItemToCart", "Passed", "200"],
-        ["PurchaseItem", "Passed", "200"]
-      ],
-      timeline: [
-        ["Rollback completed", "East US restored to v1."],
-        ["Synthetic checkout passed", "Customer checkout is healthy again."]
-      ]
-    }
-  },
-  sliced: {
-    title: "Ring Health",
-    healthy: {
-      overall: "All Systems Operational",
-      detail: "All production rings are healthy across East US and West US.",
-      impact: "0%",
-      band: "healthy",
-      deployment: "Idle",
-      apis: [
-        ["GetItem", "Operational", "99.99%"],
-        ["AddItemToCart", "Operational", "99.98%"],
-        ["PurchaseItem", "Operational", "99.97%"]
-      ],
-      topology: [
-        ["East US Ring0", "Operational", "5% capacity"],
-        ["East US Ring1", "Operational", "45% capacity"],
-        ["West US Ring0", "Operational", "5% capacity"],
-        ["West US Ring1", "Operational", "45% capacity"]
-      ],
-      synthetic: [
-        ["GetItem", "Passed", "200"],
-        ["AddItemToCart", "Passed", "200"],
-        ["PurchaseItem", "Passed", "200"]
-      ],
-      timeline: [
-        ["No active deployment", "All rings are on a healthy version."]
-      ]
-    },
-    bad: {
-      overall: "Degraded Performance",
-      detail: "The same bad patch is contained to East US Ring0 before expanding to larger rings.",
-      impact: "5%",
-      band: "degraded",
-      deployment: "Rollback",
-      apis: [
-        ["GetItem", "Operational", "99.99%"],
-        ["AddItemToCart", "Operational", "99.98%"],
-        ["PurchaseItem", "Degraded in Ring0", "0.00% in East US Ring0"]
-      ],
-      topology: [
-        ["East US Ring0", "Degraded", "5% impacted"],
-        ["East US Ring1", "Operational", "45% protected"],
-        ["West US Ring0", "Operational", "5% protected"],
-        ["West US Ring1", "Operational", "45% protected"]
-      ],
-      synthetic: [
-        ["GetItem", "Passed", "200"],
-        ["AddItemToCart", "Passed", "200"],
-        ["PurchaseItem", "Failed", "500"]
-      ],
-      timeline: [
-        ["v2-bad deployed to East US Ring0", "Initial blast radius is 5%."],
-        ["Targeted synthetic failed", "PurchaseItem returned HTTP 500."],
-        ["Health gate blocked rollout", "Ring1 and West US were not exposed."],
-        ["Rollback started", "East US Ring0 returns to v1."]
-      ]
-    },
-    recovered: {
-      overall: "All Systems Operational",
-      detail: "East US Ring0 recovered after rollback; remaining rings stayed healthy.",
-      impact: "0%",
-      band: "healthy",
-      deployment: "Recovered",
-      apis: [
-        ["GetItem", "Operational", "99.99%"],
-        ["AddItemToCart", "Operational", "99.98%"],
-        ["PurchaseItem", "Operational", "99.97%"]
-      ],
-      topology: [
-        ["East US Ring0", "Operational", "5% capacity"],
-        ["East US Ring1", "Operational", "45% capacity"],
-        ["West US Ring0", "Operational", "5% capacity"],
-        ["West US Ring1", "Operational", "45% capacity"]
-      ],
-      synthetic: [
-        ["GetItem", "Passed", "200"],
-        ["AddItemToCart", "Passed", "200"],
-        ["PurchaseItem", "Passed", "200"]
-      ],
-      timeline: [
-        ["Rollback completed", "East US Ring0 restored to v1."],
-        ["Targeted synthetic passed", "Checkout is healthy in the first ring."]
-      ]
-    }
-  }
-};
-
 const elements = {
-  statusBand: document.querySelector(".status-band"),
+  summary: document.querySelector("#summary"),
   overallStatus: document.querySelector("#overall-status"),
-  statusDetail: document.querySelector("#status-detail"),
-  impactValue: document.querySelector("#impact-value"),
-  apiSummary: document.querySelector("#api-summary"),
-  topologyTitle: document.querySelector("#topology-title"),
-  topologySummary: document.querySelector("#topology-summary"),
-  syntheticSummary: document.querySelector("#synthetic-summary"),
-  deploymentSummary: document.querySelector("#deployment-summary"),
-  apiList: document.querySelector("#api-list"),
-  topologyList: document.querySelector("#topology-list"),
-  syntheticList: document.querySelector("#synthetic-list"),
-  timeline: document.querySelector("#timeline")
+  overallDetail: document.querySelector("#overall-detail"),
+  lastUpdated: document.querySelector("#last-updated"),
+  windowLabel: document.querySelector("#window-label"),
+  componentList: document.querySelector("#component-list")
 };
 
-document.querySelectorAll(".mode-button").forEach((button) => {
-  button.addEventListener("click", () => {
-    state.mode = button.dataset.mode;
-    setActive(".mode-button", button);
-    render();
-  });
-});
+const labels = {
+  Operational: "Operational",
+  Degraded: "Degraded",
+  Unknown: "Unknown"
+};
 
-document.querySelectorAll(".scenario-button").forEach((button) => {
-  button.addEventListener("click", () => {
-    state.scenario = button.dataset.scenario;
-    setActive(".scenario-button", button);
-    render();
-  });
-});
+async function loadStatus() {
+  try {
+    const response = await fetch("/api/status", { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`Status request failed: ${response.status}`);
+    }
 
-function render() {
-  const view = data[state.mode][state.scenario];
-  elements.statusBand.className = `status-band ${view.band}`;
-  elements.overallStatus.textContent = view.overall;
-  elements.statusDetail.textContent = view.detail;
-  elements.impactValue.textContent = view.impact;
-  elements.topologyTitle.textContent = data[state.mode].title;
-  elements.apiSummary.textContent = view.apis.some((item) => !isGood(item[1])) ? "Degraded" : "Healthy";
-  elements.apiSummary.className = `pill ${view.apis.some((item) => !isGood(item[1])) ? "warn" : "good"}`;
-  elements.syntheticSummary.textContent = view.synthetic.some((item) => !isGood(item[1])) ? "Failing" : "Passing";
-  elements.syntheticSummary.className = `pill ${view.synthetic.some((item) => !isGood(item[1])) ? "bad" : "good"}`;
-  elements.deploymentSummary.textContent = view.deployment;
-  elements.deploymentSummary.className = `pill ${view.deployment === "Rollback" ? "warn" : view.deployment === "Recovered" ? "good" : "neutral"}`;
-
-  const healthyTargets = view.topology.filter((item) => isGood(item[1])).length;
-  elements.topologySummary.textContent = `${healthyTargets} of ${view.topology.length} healthy`;
-  elements.topologySummary.className = `pill ${healthyTargets === view.topology.length ? "good" : "warn"}`;
-
-  renderList(elements.apiList, view.apis, "component-row");
-  renderList(elements.topologyList, view.topology, "component-row");
-  renderList(elements.syntheticList, view.synthetic, "step-row");
-  renderList(elements.timeline, view.timeline, "timeline-row", true);
-}
-
-function renderList(container, items, rowClass, neutral = false) {
-  container.innerHTML = "";
-  for (const item of items) {
-    const row = document.createElement("li");
-    row.className = rowClass;
-
-    const dot = document.createElement("span");
-    dot.className = `dot ${neutral ? "" : dotClass(item[1])}`;
-    row.append(dot);
-
-    const text = document.createElement("span");
-    const title = document.createElement("span");
-    title.className = "row-title";
-    title.textContent = item[0];
-    const subtitle = document.createElement("span");
-    subtitle.className = "row-subtitle";
-    subtitle.textContent = item[1];
-    text.append(title, document.createElement("br"), subtitle);
-    row.append(text);
-
-    const metric = document.createElement("span");
-    metric.className = "metric";
-    metric.textContent = item[2] || "";
-    row.append(metric);
-
-    container.append(row);
+    render(await response.json());
+  } catch {
+    render({
+      generatedAtUtc: new Date().toISOString(),
+      intervalSeconds: 30,
+      overallStatus: "Unknown",
+      components: []
+    });
   }
 }
 
-function setActive(selector, activeButton) {
-  document.querySelectorAll(selector).forEach((button) => {
-    button.classList.toggle("active", button === activeButton);
+function render(status) {
+  const overall = normalizeStatus(status.overallStatus);
+  elements.summary.className = `summary ${statusClass(overall)}`;
+  elements.overallStatus.textContent = overall === "Operational"
+    ? "All Systems Operational"
+    : overall === "Degraded"
+      ? "Some Services Degraded"
+      : "Status Unavailable";
+  elements.overallDetail.textContent = overall === "Operational"
+    ? "Retail services are operating normally."
+    : overall === "Degraded"
+      ? "One or more retail service components are experiencing degraded availability."
+      : "Current service status could not be refreshed.";
+
+  elements.lastUpdated.textContent = `Last updated ${formatTime(status.generatedAtUtc)}`;
+  const intervalSeconds = Number(status.intervalSeconds || 30);
+  const historyLength = Math.max(...(status.components || []).map((component) => (component.history || []).length), 60);
+  elements.windowLabel.textContent = `Last ${Math.round((historyLength * intervalSeconds) / 60)} minutes`;
+  elements.componentList.innerHTML = "";
+
+  for (const component of status.components || []) {
+    elements.componentList.append(renderComponent(component));
+  }
+
+  if (!status.components || status.components.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "empty";
+    empty.textContent = "Status history is not available yet.";
+    elements.componentList.append(empty);
+  }
+}
+
+function renderComponent(component) {
+  const row = document.createElement("article");
+  row.className = "component-row";
+
+  const nameBlock = document.createElement("div");
+  const name = document.createElement("h4");
+  name.textContent = component.name;
+  const meta = document.createElement("p");
+  meta.textContent = labels[normalizeStatus(component.status)];
+  nameBlock.append(name, meta);
+
+  const bars = document.createElement("div");
+  bars.className = "bars";
+  bars.setAttribute("aria-label", `${component.name} status history`);
+  const points = (component.history || []).slice(-60);
+  const paddedPoints = [
+    ...Array.from({ length: Math.max(0, 60 - points.length) }, () => ({ status: "Unknown" })),
+    ...points
+  ];
+
+  for (const point of paddedPoints) {
+    const bar = document.createElement("span");
+    const pointStatus = normalizeStatus(point.status);
+    bar.className = `bar ${statusClass(pointStatus)}`;
+    bar.title = point.timeUtc
+      ? `${formatTime(point.timeUtc)} - ${labels[pointStatus]}`
+      : labels[pointStatus];
+    bars.append(bar);
+  }
+
+  const state = document.createElement("span");
+  state.className = `pill ${statusClass(normalizeStatus(component.status))}`;
+  state.textContent = labels[normalizeStatus(component.status)];
+
+  row.append(nameBlock, bars, state);
+  return row;
+}
+
+function normalizeStatus(value) {
+  return value === "Operational" || value === "Degraded" ? value : "Unknown";
+}
+
+function statusClass(status) {
+  if (status === "Operational") {
+    return "operational";
+  }
+
+  if (status === "Degraded") {
+    return "degraded";
+  }
+
+  return "unknown";
+}
+
+function formatTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "unknown";
+  }
+
+  return date.toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit"
   });
 }
 
-function isGood(value) {
-  return value === "Operational" || value === "Passed";
-}
-
-function dotClass(value) {
-  if (value === "Failed" || value === "Partial Outage") {
-    return "bad";
-  }
-
-  if (value.includes("Degraded")) {
-    return "warn";
-  }
-
-  return "";
-}
-
-render();
+loadStatus();
+setInterval(loadStatus, 5000);

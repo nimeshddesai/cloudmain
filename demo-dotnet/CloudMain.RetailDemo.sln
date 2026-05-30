@@ -1,4 +1,4 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -11,6 +11,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StatusPage", "src\StatusPage\StatusPage.csproj", "{D43FF6BA-03C7-4A55-9CA9-B2E36824A1C1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RetailService.Tests", "tests\RetailService.Tests\RetailService.Tests.csproj", "{91569ABF-C010-4939-B9F3-35869E0532CF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0BD15773-CC08-4A82-B4B7-40C5E3A76C72}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SyntheticWorker", "src\SyntheticWorker\SyntheticWorker.csproj", "{93FE5624-05E8-431C-928A-2C6EE104E432}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,5 +42,12 @@ Global
 		{91569ABF-C010-4939-B9F3-35869E0532CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91569ABF-C010-4939-B9F3-35869E0532CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91569ABF-C010-4939-B9F3-35869E0532CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93FE5624-05E8-431C-928A-2C6EE104E432}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93FE5624-05E8-431C-928A-2C6EE104E432}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93FE5624-05E8-431C-928A-2C6EE104E432}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93FE5624-05E8-431C-928A-2C6EE104E432}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{93FE5624-05E8-431C-928A-2C6EE104E432} = {0BD15773-CC08-4A82-B4B7-40C5E3A76C72}
 	EndGlobalSection
 EndGlobal
