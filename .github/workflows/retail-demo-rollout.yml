@@ -6,19 +6,20 @@ on:
       rollout_mode:
         description: "Rollout topology to use."
         required: true
-        default: "sliced"
+        default: "service-rings"
         type: choice
         options:
-          - sliced
+          - service-rings
           - current
-      patch_version:
-        description: "Patch version to deploy. Use v2-bad to fail PurchaseItem."
+      patch:
+        description: "Patch to deploy. Patch 2 contains the Purchase bug."
         required: true
-        default: "v2-bad"
+        default: "Patch 2"
         type: choice
         options:
-          - v2-bad
-          - v2
+          - "Patch 1"
+          - "Patch 2"
+          - "Patch 3"
       stable_image:
         description: "Known-good service image used for rollback."
         required: true
@@ -86,7 +87,7 @@ jobs:
         shell: bash
         env:
           PATCH_IMAGE: ${{ steps.image.outputs.image }}
-          PATCH_VERSION: ${{ inputs.patch_version }}
+          PATCH_NAME: ${{ inputs.patch }}
           ROLLOUT_MODE: ${{ inputs.rollout_mode }}
           ROLLBACK_ON_FAILURE: ${{ inputs.rollback_on_failure }}
           SYNTHETIC_KEY: ${{ secrets.SYNTHETIC_KEY }}
@@ -113,34 +114,35 @@ jobs:
           fi
 
           for target in "${targets[@]}"; do
-            IFS="|" read -r app_name slice capacity <<< "$target"
+            IFS="|" read -r app_name service_ring capacity <<< "$target"
 
-            echo "::group::Deploy patch to $slice"
-            echo "Deploying retail service patch $PATCH_VERSION to $app_name ($slice, ${capacity}% capacity)"
+            echo "::group::Deploy $PATCH_NAME to $service_ring"
+            echo "Deploying retail service $PATCH_NAME to $app_name ($service_ring, ${capacity}% capacity)"
             az containerapp update \
               --resource-group "$RESOURCE_GROUP" \
               --name "$app_name" \
               --image "$PATCH_IMAGE" \
-              --set-env-vars Demo__Version="$PATCH_VERSION"
+              --set-env-vars Demo__Version="$PATCH_NAME"
             echo "::endgroup::"
 
-            echo "::group::Validate checkout path in $slice"
-            echo "Running checkout validation for $slice through Azure Front Door"
+            echo "::group::Validate checkout path in $service_ring"
+            echo "Running checkout validation for $service_ring through Azure Front Door"
             if ! dotnet run --project demo-dotnet/src/SyntheticRunner -- \
               --url "$FRONT_DOOR_URL" \
-              --target-slice "$slice" \
+              --target-slice "$service_ring" \
               --synthetic-key "$SYNTHETIC_KEY"; then
               echo "::endgroup::"
-              echo "::error::Checkout validation failed for $slice. Patch rollout stopped before wider impact."
+              echo "::error::Checkout validation failed for $service_ring. Patch rollout stopped before wider impact."
               echo "FAILED_APP=$app_name" >> "$GITHUB_ENV"
-              echo "FAILED_SLICE=$slice" >> "$GITHUB_ENV"
+              echo "FAILED_SERVICE_RING=$service_ring" >> "$GITHUB_ENV"
               echo "FAILED_CAPACITY=$capacity" >> "$GITHUB_ENV"
+              echo "FAILED_PATCH=$PATCH_NAME" >> "$GITHUB_ENV"
               echo "ROLLBACK_ON_FAILURE=$ROLLBACK_ON_FAILURE" >> "$GITHUB_ENV"
               exit 1
             fi
             echo "::endgroup::"
 
-            echo "Checkout validation passed for $slice"
+            echo "Checkout validation passed for $service_ring"
           done
 
           echo "Retail service patch rollout completed successfully."
@@ -152,7 +154,7 @@ jobs:
           STABLE_IMAGE: ${{ inputs.stable_image }}
         run: |
           set -euo pipefail
-          echo "Rolling back $FAILED_SLICE (${FAILED_CAPACITY}% capacity target) to the known-good retail service image."
+          echo "Rolling back $FAILED_SERVICE_RING (${FAILED_CAPACITY}% capacity target) to the known-good retail service image."
           az containerapp update \
             --resource-group "$RESOURCE_GROUP" \
             --name "$FAILED_APP" \
@@ -163,10 +165,31 @@ jobs:
         if: failure() && env.FAILED_APP != '' && env.ROLLBACK_ON_FAILURE != 'true'
         run: |
           echo "Rollback is disabled for this run."
-          echo "Retail service patch remains deployed on $FAILED_SLICE for observation."
+          echo "$FAILED_PATCH remains deployed on $FAILED_SERVICE_RING for observation."
           echo "Run Retail Service Patch Rollback when ready to restore the target."
+
+      - name: Notify deployment incident
+        if: failure() && env.FAILED_APP != ''
+        shell: bash
+        env:
+          INCIDENT_WEBHOOK: ${{ secrets.DEPLOYMENT_INCIDENT_WEBHOOK }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          message="Retail service deployment incident: $FAILED_PATCH failed checkout validation on $FAILED_SERVICE_RING (${FAILED_CAPACITY}% capacity target). Rollback on failure: $ROLLBACK_ON_FAILURE. Run: $RUN_URL"
+          echo "::warning::$message"
+
+          if [[ -z "${INCIDENT_WEBHOOK:-}" ]]; then
+            echo "DEPLOYMENT_INCIDENT_WEBHOOK is not configured; skipping external incident notification."
+            exit 0
+          fi
+
+          curl -fsS \
+            -H "Content-Type: application/json" \
+            -d "{\"text\":\"$message\"}" \
+            "$INCIDENT_WEBHOOK"
 
       - name: Stop patch rollout before wider impact
         if: failure() && env.FAILED_APP != ''
         run: |
-          echo "Retail service patch rollout stopped after failed checkout validation in $FAILED_SLICE."
+          echo "Retail service patch rollout stopped after failed checkout validation in $FAILED_SERVICE_RING."

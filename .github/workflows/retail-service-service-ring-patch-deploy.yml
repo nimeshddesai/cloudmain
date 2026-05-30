@@ -1,16 +1,14 @@
-name: Retail Service Patch Deploy
+name: Retail Service ServiceRing Patch Deploy
 
 on:
   workflow_dispatch:
     inputs:
-      target:
-        description: "Deployment target to patch."
+      service_ring:
+        description: "Production ServiceRing to patch."
         required: true
-        default: "eastus"
+        default: "eastus-ring0"
         type: choice
         options:
-          - eastus
-          - westus
           - eastus-ring0
           - eastus-ring1
           - westus-ring0
@@ -36,7 +34,7 @@ env:
 
 jobs:
   deploy:
-    name: Deploy patch and leave target degraded
+    name: Deploy patch to selected ServiceRing
     runs-on: ubuntu-latest
     environment: retail-demo
     steps:
@@ -53,23 +51,15 @@ jobs:
       - name: Ensure Azure Container Apps CLI support
         run: az extension add --name containerapp --upgrade
 
-      - name: Select retail service target
-        id: target
+      - name: Select production ServiceRing
+        id: service_ring
         shell: bash
         env:
-          TARGET: ${{ inputs.target }}
+          SERVICE_RING: ${{ inputs.service_ring }}
         run: |
           set -euo pipefail
 
-          case "$TARGET" in
-            eastus)
-              app_name="ca-retaildemo-cur-eus"
-              capacity="50"
-              ;;
-            westus)
-              app_name="ca-retaildemo-cur-wus"
-              capacity="50"
-              ;;
+          case "$SERVICE_RING" in
             eastus-ring0)
               app_name="ca-retaildemo-sl-eus-r0"
               capacity="5"
@@ -87,7 +77,7 @@ jobs:
               capacity="45"
               ;;
             *)
-              echo "Unknown target: $TARGET"
+              echo "Unknown ServiceRing: $SERVICE_RING"
               exit 1
               ;;
           esac
@@ -100,7 +90,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          tag="retail-service:manual-patch-${GITHUB_SHA::12}"
+          tag="retail-service:service-ring-patch-${GITHUB_SHA::12}"
           image="$ACR_LOGIN_SERVER/$tag"
 
           az acr build \
@@ -111,21 +101,21 @@ jobs:
 
           echo "image=$image" >> "$GITHUB_OUTPUT"
 
-      - name: Deploy patch to selected target
+      - name: Deploy patch and leave ServiceRing patched
         shell: bash
         env:
-          APP_NAME: ${{ steps.target.outputs.app_name }}
-          CAPACITY: ${{ steps.target.outputs.capacity }}
+          APP_NAME: ${{ steps.service_ring.outputs.app_name }}
+          CAPACITY: ${{ steps.service_ring.outputs.capacity }}
           PATCH_IMAGE: ${{ steps.image.outputs.image }}
           PATCH_NAME: ${{ inputs.patch }}
-          TARGET: ${{ inputs.target }}
+          SERVICE_RING: ${{ inputs.service_ring }}
         run: |
           set -euo pipefail
-          echo "Deploying retail service $PATCH_NAME to $TARGET (${CAPACITY}% capacity target)."
+          echo "Deploying retail service $PATCH_NAME to $SERVICE_RING (${CAPACITY}% capacity ServiceRing)."
           az containerapp update \
             --resource-group "$RESOURCE_GROUP" \
             --name "$APP_NAME" \
             --image "$PATCH_IMAGE" \
             --set-env-vars Demo__Version="$PATCH_NAME"
 
-          echo "::warning::Patch deployed and intentionally left in place. Trigger Retail Service Patch Rollback after observing status."
+          echo "::warning::Patch deployed and intentionally left on $SERVICE_RING. Trigger Retail Service ServiceRing Patch Rollback when ready."

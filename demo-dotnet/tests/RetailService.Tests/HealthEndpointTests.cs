@@ -46,19 +46,19 @@ public sealed class HealthEndpointTests
     [Fact]
     public async Task BadPatchFailsOnlyPurchaseItem()
     {
-        using var factory = CreateFactory("v2-bad");
+        using var factory = CreateFactory("Patch 2");
         using var client = factory.CreateClient();
 
         var itemResponse = await client.GetAsync("/items/sku-100");
         var cartResponse = await client.PostAsJsonAsync("/cart/items", new
         {
-            cartId = "test-cart-v2-bad",
+            cartId = "test-cart-patch-2",
             itemId = "sku-100",
             quantity = 1
         });
         var purchaseResponse = await client.PostAsJsonAsync("/purchase", new
         {
-            cartId = "test-cart-v2-bad",
+            cartId = "test-cart-patch-2",
             customerId = "customer-1"
         });
 

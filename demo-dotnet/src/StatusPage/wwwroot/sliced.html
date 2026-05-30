@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CloudMain Retail Service Status</title>
-  <meta name="status-endpoint" content="/api/status">
-  <meta name="status-scope" content="public">
+  <title>CloudMain Retail ServiceRings Status</title>
+  <meta name="status-endpoint" content="/api/status/service-rings">
+  <meta name="status-scope" content="service-rings">
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
@@ -13,24 +13,24 @@
     <header class="page-header">
       <div>
         <p class="eyebrow">CloudMain Retail</p>
-        <h1>Service Status</h1>
+        <h1>ServiceRings Status</h1>
       </div>
-      <a class="view-link" href="/service-rings">ServiceRings view</a>
+      <a class="view-link" href="/">Public view</a>
       <span id="last-updated" class="timestamp">Checking status...</span>
     </header>
 
     <section id="summary" class="summary operational" aria-live="polite">
       <span class="status-dot" aria-hidden="true"></span>
       <div>
-        <p class="summary-label">Current status</p>
-        <h2 id="overall-status">All Systems Operational</h2>
-        <p id="overall-detail">Retail services are operating normally.</p>
+        <p class="summary-label">ServiceRings production status</p>
+        <h2 id="overall-status">All ServiceRings Operational</h2>
+        <p id="overall-detail">All production ServiceRings are operating normally.</p>
       </div>
     </section>
 
-    <section class="status-card" aria-label="Service components">
+    <section class="status-card" aria-label="ServiceRings">
       <div class="status-card-heading">
-        <h3>Components</h3>
+        <h3>Production ServiceRings</h3>
         <span id="window-label">Last 30 minutes</span>
       </div>
       <div id="component-list" class="component-list"></div>

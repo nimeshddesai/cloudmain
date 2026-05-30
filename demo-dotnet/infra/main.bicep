@@ -293,8 +293,12 @@ resource syntheticWorkerApp 'Microsoft.App/containerApps@2024-03-01' = {
               value: 'status'
             }
             {
-              name: 'STATUS_BLOB'
+              name: 'PUBLIC_STATUS_BLOB'
               value: 'public-status.json'
+            }
+            {
+              name: 'SERVICE_RINGS_STATUS_BLOB'
+              value: 'service-rings-status.json'
             }
             {
               name: 'CHECK_INTERVAL_SECONDS'

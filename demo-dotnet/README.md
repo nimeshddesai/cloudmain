@@ -1,6 +1,6 @@
-# CloudMain Retail Observability Demo (.NET)
+# CloudMain Retail Observability (.NET)
 
-This folder contains the C#/.NET version of the retail observability demo.
+This folder contains the C#/.NET retail observability implementation.
 It is separate from the existing Node/npm prototype in `demo/`.
 
 ## Current scope
@@ -10,14 +10,12 @@ The current local scope includes the first service and synthetic pieces:
 - `RetailService`: ASP.NET Core service that will expose retail APIs.
 - `SyntheticRunner`: console app that runs checkout synthetics.
 - `DemoControl`: console app that will coordinate rollout scenarios.
-- `StatusPage`: availability page for the current and sliced deployment stories.
+- `StatusPage`: availability page for regional and ServiceRings views.
 - `RetailService.Tests`: test project for service behavior and health gates.
-
-No Azure resources are created yet.
 
 ## Target regions
 
-The Azure demo will use US regions:
+The Azure deployment uses US regions:
 
 - East US
 - West US
@@ -27,7 +25,7 @@ Current setup:
 - East US: 50%
 - West US: 50%
 
-Sliced setup:
+ServiceRings setup:
 
 - East US Ring0: 5%
 - East US Ring1: 45%
@@ -59,15 +57,16 @@ The service exposes:
 - `POST /purchase`
 - `GET /health`
 
-`Demo:Version` controls the simulated deployment version:
+`Demo:Version` controls the patch behavior:
 
-- `v1`: all APIs are healthy.
-- `v2-bad`: `GetItem` and `AddItemToCart` work, but `PurchaseItem` fails.
+- `Patch 1`: all APIs are healthy.
+- `Patch 2`: `GetItem` and `AddItemToCart` work, but `PurchaseItem` fails.
+- `Patch 3`: all APIs are healthy.
 
-Run locally with a bad patch once the .NET SDK is installed:
+Run locally with the patch that contains the Purchase bug:
 
 ```powershell
-$env:Demo__Version="v2-bad"
+$env:Demo__Version="Patch 2"
 dotnet run --project demo-dotnet/src/RetailService
 ```
 
@@ -85,7 +84,7 @@ Run against a local service:
 dotnet run --project demo-dotnet/src/SyntheticRunner -- --url http://localhost:5000
 ```
 
-Run through a future Front Door endpoint with protected target-slice headers:
+Run through Azure Front Door with protected ServiceRing targeting:
 
 ```powershell
 dotnet run --project demo-dotnet/src/SyntheticRunner -- `
@@ -110,17 +109,17 @@ Current regional rollout:
 ```powershell
 dotnet run --project demo-dotnet/src/DemoControl -- `
   current `
-  --version v2-bad `
+  --version "Patch 2" `
   --url https://retail-demo.example.com `
   --synthetic-key <secret>
 ```
 
-Sliced rollout:
+ServiceRings rollout:
 
 ```powershell
 dotnet run --project demo-dotnet/src/DemoControl -- `
-  sliced `
-  --version v2-bad `
+  service-rings `
+  --version "Patch 2" `
   --url https://retail-demo.example.com `
   --synthetic-key <secret>
 ```
@@ -131,16 +130,16 @@ Current mode validates:
 East US 50% -> West US 50%
 ```
 
-Sliced mode validates:
+ServiceRings mode validates:
 
 ```text
 East US Ring0 5% -> East US Ring1 45% -> West US Ring0 5% -> West US Ring1 45%
 ```
 
-The intended demo behavior is:
+The intended behavior is:
 
 ```text
-v2-bad fails PurchaseItem
+Patch 2 fails PurchaseItem
 health gate fails
 rollback current target to v1
 pipeline stops before the next target
@@ -148,10 +147,10 @@ pipeline stops before the next target
 
 ## Status page
 
-The status page shows the customer/operator availability view for both demo phases:
+The status page shows customer and ServiceRings availability views:
 
 - Current deployment: East US 50%, West US 50%
-- Sliced deployment: East US Ring0/Ring1, West US Ring0/Ring1
+- ServiceRings deployment: East US Ring0/Ring1, West US Ring0/Ring1
 
 Run locally:
 

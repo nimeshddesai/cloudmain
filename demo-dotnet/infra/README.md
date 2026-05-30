@@ -1,6 +1,6 @@
 # Azure Infrastructure
 
-This folder contains Bicep infrastructure for the .NET retail observability demo.
+This folder contains Bicep infrastructure for the .NET retail observability environment.
 
 ## Scope
 
@@ -11,7 +11,7 @@ The template prepares:
 - Application Insights
 - Azure Container Apps environments in East US and West US
 - Container Apps for the current deployment model
-- Container Apps for the sliced deployment model
+- Container Apps for the ServiceRings deployment model
 - Container App for the status page
 - Azure Front Door Standard profile and endpoint scaffold
 
@@ -22,7 +22,7 @@ East US 50%
 West US 50%
 ```
 
-## Sliced topology
+## ServiceRings topology
 
 ```text
 East US Ring0 5%
@@ -126,7 +126,7 @@ The real retail service patch pipeline is defined in:
 It is manually started from GitHub Actions and performs:
 
 - Build and push the retail service image to Azure Container Registry.
-- Deploy the patch to either the sliced or current topology.
+- Deploy the patch to either the ServiceRings or current topology.
 - Run synthetic checkout through Azure Front Door after each target.
 - Stop and run a separate rollback task for the failed target if checkout validation fails.
 
@@ -147,17 +147,17 @@ repo:sanjayraghani/cloudmain:environment:retail-demo
 
 The workflow uses the `retail-demo` GitHub environment for the deployment job. Create that environment before running the workflow. Add required reviewers if you want manual approval before rollout begins.
 
-For the failure demo, run the workflow with:
+For a failure walkthrough, run the workflow with:
 
 ```text
-rollout_mode: sliced
-patch_version: v2-bad
+rollout_mode: service-rings
+patch: Patch 2
 ```
 
 Expected result:
 
 ```text
-eastus-ring0 deploys v2-bad
+eastus-ring0 deploys Patch 2
 GetItem passes
 AddItemToCart passes
 PurchaseItem fails

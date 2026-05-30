@@ -10,11 +10,11 @@ Add `GetItem`, `AddItemToCart`, `PurchaseItem`, version behavior, and in-memory 
 
 ## Phase 3: Synthetic runner
 
-Run the checkout flow and support protected target-slice headers.
+Run the checkout flow and support protected ServiceRing targeting.
 
 ## Phase 4: Health gate and rollout logic
 
-Add current and sliced rollout simulation.
+Add current and ServiceRings rollout simulation.
 
 ## Phase 5: Status/availability page
 
@@ -34,7 +34,7 @@ Deploy and validate one service.
 
 ## Phase 9: Full US topology
 
-Deploy East US / West US current and sliced topology.
+Deploy East US / West US current and ServiceRings topology.
 
 ## Phase 10: Pipeline and rollback
 

@@ -18,9 +18,13 @@ while (true)
 {
     try
     {
-        var snapshot = await RunSnapshotAsync(client, options);
-        await WriteSnapshotAsync(snapshot, options);
-        Console.WriteLine($"{snapshot.GeneratedAtUtc:o} status={snapshot.OverallStatus}");
+        var publicSnapshot = await RunPublicSnapshotAsync(client, options);
+        await WriteSnapshotAsync(publicSnapshot, options, options.PublicBlobName);
+
+        var serviceRingsSnapshot = await RunServiceRingsSnapshotAsync(client, options);
+        await WriteSnapshotAsync(serviceRingsSnapshot, options, options.ServiceRingsBlobName);
+
+        Console.WriteLine($"{publicSnapshot.GeneratedAtUtc:o} public={publicSnapshot.OverallStatus} serviceRings={serviceRingsSnapshot.OverallStatus}");
     }
     catch (Exception ex)
     {
@@ -30,13 +34,13 @@ while (true)
     await Task.Delay(TimeSpan.FromSeconds(options.IntervalSeconds));
 }
 
-static async Task<StatusSnapshot> RunSnapshotAsync(HttpClient client, WorkerOptions options)
+static async Task<StatusSnapshot> RunPublicSnapshotAsync(HttpClient client, WorkerOptions options)
 {
     var now = DateTimeOffset.UtcNow;
     var east = await RunRegionalCheckoutAsync(client, "eastus", "East US", options.SyntheticKey);
     var west = await RunRegionalCheckoutAsync(client, "westus", "West US", options.SyntheticKey);
 
-    var previous = await ReadSnapshotAsync(options);
+    var previous = await ReadSnapshotAsync(options, options.PublicBlobName);
     var components = new[]
     {
         BuildComponent("catalog", "Catalog", now, StepStatus(east.GetItem) && StepStatus(west.GetItem), previous),
@@ -44,6 +48,36 @@ static async Task<StatusSnapshot> RunSnapshotAsync(HttpClient client, WorkerOpti
         BuildComponent("checkout", "Checkout", now, StepStatus(east.PurchaseItem) && StepStatus(west.PurchaseItem), previous),
         BuildComponent("eastus", "East US", now, east.Healthy, previous),
         BuildComponent("westus", "West US", now, west.Healthy, previous)
+    };
+
+    var overall = components.All(component => component.Status == PublicStatus.Operational)
+        ? PublicStatus.Operational
+        : PublicStatus.Degraded;
+
+    return new StatusSnapshot(
+        now,
+        options.IntervalSeconds,
+        overall,
+        components);
+}
+
+static async Task<StatusSnapshot> RunServiceRingsSnapshotAsync(HttpClient client, WorkerOptions options)
+{
+    var now = DateTimeOffset.UtcNow;
+    var eastRing0 = await RunRegionalCheckoutAsync(client, "eastus-ring0", "East US Ring 0", options.SyntheticKey);
+    var eastRing1 = await RunRegionalCheckoutAsync(client, "eastus-ring1", "East US Ring 1", options.SyntheticKey);
+    var westRing0 = await RunRegionalCheckoutAsync(client, "westus-ring0", "West US Ring 0", options.SyntheticKey);
+    var westRing1 = await RunRegionalCheckoutAsync(client, "westus-ring1", "West US Ring 1", options.SyntheticKey);
+    var targets = new[] { eastRing0, eastRing1, westRing0, westRing1 };
+
+    var previous = await ReadSnapshotAsync(options, options.ServiceRingsBlobName);
+    var components = new[]
+    {
+        BuildComponent("checkout", "Checkout by ServiceRing", now, targets.All(target => StepStatus(target.PurchaseItem)), previous),
+        BuildComponent("eastus-ring0", "East US ServiceRing 0 (5%)", now, eastRing0.Healthy, previous),
+        BuildComponent("eastus-ring1", "East US ServiceRing 1 (45%)", now, eastRing1.Healthy, previous),
+        BuildComponent("westus-ring0", "West US ServiceRing 0 (5%)", now, westRing0.Healthy, previous),
+        BuildComponent("westus-ring1", "West US ServiceRing 1 (45%)", now, westRing1.Healthy, previous)
     };
 
     var overall = components.All(component => component.Status == PublicStatus.Operational)
@@ -125,11 +159,11 @@ static bool StepStatus(HttpStatusCode statusCode)
     return (int)statusCode is >= 200 and <= 299;
 }
 
-static async Task<StatusSnapshot?> ReadSnapshotAsync(WorkerOptions options)
+static async Task<StatusSnapshot?> ReadSnapshotAsync(WorkerOptions options, string blobName)
 {
     try
     {
-        var blob = GetBlob(options);
+        var blob = GetBlob(options, blobName);
         if (!await blob.ExistsAsync())
         {
             return null;
@@ -144,9 +178,9 @@ static async Task<StatusSnapshot?> ReadSnapshotAsync(WorkerOptions options)
     }
 }
 
-static async Task WriteSnapshotAsync(StatusSnapshot snapshot, WorkerOptions options)
+static async Task WriteSnapshotAsync(StatusSnapshot snapshot, WorkerOptions options, string blobName)
 {
-    var blob = GetBlob(options);
+    var blob = GetBlob(options, blobName);
     await blob.UploadAsync(
         BinaryData.FromObjectAsJson(snapshot, JsonDefaults.Options),
         new BlobUploadOptions
@@ -158,12 +192,12 @@ static async Task WriteSnapshotAsync(StatusSnapshot snapshot, WorkerOptions opti
         });
 }
 
-static BlobClient GetBlob(WorkerOptions options)
+static BlobClient GetBlob(WorkerOptions options, string blobName)
 {
     var service = new BlobServiceClient(options.StorageConnectionString);
     var container = service.GetBlobContainerClient(options.ContainerName);
     container.CreateIfNotExists(PublicAccessType.None);
-    return container.GetBlobClient(options.BlobName);
+    return container.GetBlobClient(blobName);
 }
 
 internal sealed record WorkerOptions(
@@ -171,7 +205,8 @@ internal sealed record WorkerOptions(
     string SyntheticKey,
     string StorageConnectionString,
     string ContainerName,
-    string BlobName,
+    string PublicBlobName,
+    string ServiceRingsBlobName,
     int IntervalSeconds)
 {
     public static WorkerOptions FromEnvironment()
@@ -181,7 +216,8 @@ internal sealed record WorkerOptions(
             Required("SYNTHETIC_KEY"),
             Required("STATUS_STORAGE_CONNECTION_STRING"),
             Environment.GetEnvironmentVariable("STATUS_CONTAINER") ?? "status",
-            Environment.GetEnvironmentVariable("STATUS_BLOB") ?? "public-status.json",
+            Environment.GetEnvironmentVariable("PUBLIC_STATUS_BLOB") ?? "public-status.json",
+            Environment.GetEnvironmentVariable("SERVICE_RINGS_STATUS_BLOB") ?? "service-rings-status.json",
             int.TryParse(Environment.GetEnvironmentVariable("CHECK_INTERVAL_SECONDS"), out var seconds) ? seconds : 30);
     }
 

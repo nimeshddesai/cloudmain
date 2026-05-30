@@ -1,208 +1,255 @@
-# Multi-Region Retail Service Patch Safety Demo
+# Production Deployment Reliability Modernization
 
-## Purpose
+Reducing deployment blast radius with ServiceRings, checkout-path synthetics, and automated health gates.
 
-This demo shows how production observability plus sliced rollout architecture reduces customer impact when a bad retail service patch is released.
+## Customer Service Setup
 
-The retail service exposes a simple checkout path:
+The customer operates a multi-region retail service. Clients use a checkout workflow that depends on service APIs and a database write during purchase.
 
 ```text
 Catalog lookup -> Add to cart -> Purchase
 ```
 
-The bad patch intentionally breaks only `Purchase`, while catalog and cart still work. This makes the failure realistic: the service is partially healthy, but the customer-critical checkout path is broken.
-
-## Customer Starting Point: Regional Rollout
-
-Many customers already run in multiple regions, but deploy one full region at a time. Metrics may exist at region level, yet detection often happens only after a large customer impact.
-
-### Customer Runtime Flow
+The business-critical risk is not just whether the service is up. A patch can leave catalog and cart healthy while breaking purchase completion.
 
 ```mermaid
 flowchart LR
-    C["Clients"] --> AFD["Azure Front Door"]
-    AFD --> EUS["East US service\n50% capacity"]
-    AFD --> WUS["West US service\n50% capacity"]
-    EUS --> DB["Purchase database"]
-    WUS --> DB
+    Client["Client applications"] --> AFD["Azure Front Door"]
+    AFD --> East["Retail service\nEast US"]
+    AFD --> West["Retail service\nWest US"]
+    East --> DB["Purchase database"]
+    West --> DB
 ```
 
-### Deployment Flow
+## Azure Components In The Customer Setup
+
+Current production components:
+
+```text
+Azure Front Door
+  Global entry point and traffic distribution.
+
+Retail service in East US and West US
+  Hosts Catalog, Cart, and Purchase APIs.
+
+Purchase database
+  Records completed purchases.
+
+Regional metrics
+  Shows service health at broad regional granularity.
+
+Deployment pipeline
+  Pushes retail service patches to production regions.
+```
+
+## Current Deployment Model
+
+The existing rollout model deploys one full region at a time.
+
+```text
+East US = 50% capacity
+West US = 50% capacity
+```
 
 ```mermaid
 flowchart LR
-    P["Patch pipeline"] --> EUS
-    P -. "wait, then continue" .-> WUS
-    EUS["East US service\n50% capacity"]
-    WUS["West US service\n50% capacity"]
+    Pipeline["Deployment pipeline"] --> East["Deploy patch to East US\n50% capacity"]
+    East -. "wait / observe" .-> West["Deploy patch to West US\n50% capacity"]
 ```
 
-### Challenge
+## Challenges In The Current Model
 
-If the patch is deployed to East US first and breaks checkout:
+If Patch 2 contains a Purchase bug and is deployed to East US first:
 
 ```text
-Impact target: 50% of production capacity
-Detection: regional synthetic or customer failures
-Rollback: after failure is detected
-Risk: large blast radius before the pipeline stops
+Catalog API: healthy
+Cart API: healthy
+Purchase API: failing
+Capacity at risk: 50%
+Detection: after regional synthetic or customer checkout failures
+Outcome: rollback can repair East US, but the first failure target is large
 ```
 
-In the demo, the GitHub workflow is run as:
+The key challenge is blast radius. Multi-region architecture helps availability, but regional deployment still exposes a large production target to a faulty patch.
+
+## Modernization Added
+
+The modernization splits the same production capacity into ServiceRings and adds checkout-path validation before expanding rollout.
 
 ```text
-rollout_mode = current
-patch_version = v2-bad
+East US ServiceRing 0 = 5%
+East US ServiceRing 1 = 45%
+West US ServiceRing 0 = 5%
+West US ServiceRing 1 = 45%
 ```
 
-Expected result:
+Added capabilities:
 
 ```text
-Deploy patch to East US
-Checkout validation fails on Purchase
-Rollback East US
-Stop before West US
+ServiceRing-based production topology
+Targeted synthetic checkout validation
+Patch pipeline health gates
+Automatic rollback option
+ServiceRings status page
+Incident notification hook
 ```
 
-## Improved Setup: Sliced Production Rollout
+## Modernized Runtime Architecture
 
-We help re-architect production capacity into smaller slices while keeping the same total regional capacity. The first production deployment goes to a small slice, then expands only after checkout validation passes.
-
-### Customer Runtime Flow
+Customer traffic still enters through Azure Front Door, but production capacity is organized into smaller ServiceRings.
 
 ```mermaid
 flowchart LR
-    C["Clients"] --> AFD["Azure Front Door"]
-    AFD --> E0["East US Ring 0\n5% capacity"]
-    AFD --> E1["East US Ring 1\n45% capacity"]
-    AFD --> W0["West US Ring 0\n5% capacity"]
-    AFD --> W1["West US Ring 1\n45% capacity"]
+    Client["Client applications"] --> AFD["Azure Front Door"]
+    AFD --> E0["East US ServiceRing 0\n5%"]
+    AFD --> E1["East US ServiceRing 1\n45%"]
+    AFD --> W0["West US ServiceRing 0\n5%"]
+    AFD --> W1["West US ServiceRing 1\n45%"]
     E0 --> DB["Purchase database"]
     E1 --> DB
     W0 --> DB
     W1 --> DB
 ```
 
-### Deployment Flow
+## Modernized Deployment Flow
+
+Patch rollout starts with the smallest production ring and proceeds only when checkout validation passes.
 
 ```mermaid
 flowchart LR
-    P["Patch pipeline"] --> E0
-    P -. "only if healthy" .-> E1
-    P -. "only if healthy" .-> W0
-    P -. "only if healthy" .-> W1
-    E0["East US Ring 0\n5% capacity"]
-    E1["East US Ring 1\n45% capacity"]
-    W0["West US Ring 0\n5% capacity"]
-    W1["West US Ring 1\n45% capacity"]
+    Pipeline["Retail Service Patch pipeline"] --> E0["Patch East US ServiceRing 0\n5%"]
+    E0 --> Gate0["Checkout health gate"]
+    Gate0 -. "pass" .-> E1["Patch East US ServiceRing 1\n45%"]
+    E1 --> Gate1["Checkout health gate"]
+    Gate1 -. "pass" .-> W0["Patch West US ServiceRing 0\n5%"]
+    W0 --> Gate2["Checkout health gate"]
+    Gate2 -. "pass" .-> W1["Patch West US ServiceRing 1\n45%"]
+    Gate0 -. "fail" .-> Rollback["Rollback failed target\nor leave patched for observation"]
 ```
 
-### Improvement
+## Synthetics Flow
 
-If the same bad patch breaks checkout:
-
-```text
-Impact target: 5% of production capacity
-Detection: targeted synthetic checkout validation
-Rollback: only the failed slice
-Risk: rollout stops before larger rings are exposed
-```
-
-In the demo, the GitHub workflow is run as:
-
-```text
-rollout_mode = sliced
-patch_version = v2-bad
-```
-
-Expected result:
-
-```text
-Deploy patch to East US Ring 0
-Checkout validation fails on Purchase
-Rollback East US Ring 0
-Stop before East US Ring 1 and West US
-```
-
-## Observability Loop
-
-The demo uses synthetic transactions to validate the complete checkout path, not just service uptime.
+Synthetics validate the customer journey, not just basic uptime.
 
 ```mermaid
 flowchart LR
-    W["Synthetic worker\nruns every 30 seconds"] --> AFD["Azure Front Door"]
-    AFD --> SVC["Retail service target"]
-    SVC --> DB["Purchase database"]
-    W --> Store["Status history JSON\nAzure Storage"]
-    Store --> Status["Public service status page\navailability bars"]
-    GH["Retail Service Patch\nGitHub Actions"] --> AFD
-    GH --> Rollback["Rollback failed target"]
+    Worker["Synthetic worker\nEvery 30 seconds"] --> AFD["Azure Front Door"]
+    AFD --> Target["Target region or ServiceRing"]
+    Target --> APIs["Catalog -> Cart -> Purchase"]
+    APIs --> DB["Purchase database"]
+    Worker --> Store["Azure Storage\nrolling status JSON"]
+    Store --> Public["Public status page\nregional bars"]
+    Store --> Rings["ServiceRings status page\nring-level bars"]
 ```
 
-The public status page shows customer-safe availability:
+Every 30 seconds:
 
 ```text
-Catalog
-Cart
-Checkout
-East US
-West US
+1. Synthetic worker calls Azure Front Door.
+2. It targets a region or ServiceRing using protected routing.
+3. It runs Catalog -> Cart -> Purchase.
+4. It records pass/fail by component and target.
+5. It writes rolling history to Azure Storage.
+6. Status pages render availability bars from the latest history.
 ```
 
-It does not expose patch versions, rollback details, synthetic headers, or internal ring names.
+## Incident Notification Flow
 
-## Demo Walkthrough
+When checkout validation fails during patch rollout, the pipeline stops before wider exposure and raises an incident notification.
 
-1. Open the public status page:
+```mermaid
+flowchart LR
+    Gate["Checkout validation fails"] --> Stop["Stop rollout"]
+    Stop --> Rollback["Optional automatic rollback"]
+    Stop --> Notify["Incident notification"]
+    Notify --> Team["Deployment owner / on-call team"]
+    Notify --> Tool["Azure Monitor Action Group\nEmail, SMS, webhook, Teams, PagerDuty"]
+```
 
-   ```text
-   https://retail-retaildemo-bjg2ebhydwemckfr.z02.azurefd.net/
-   ```
-
-2. Run the current regional rollout:
-
-   ```text
-   Retail Service Patch
-   rollout_mode = current
-   patch_version = v2-bad
-   rollback_on_failure = true
-   ```
-
-   Message: a bad patch can threaten a full 50% regional target.
-
-3. Run the sliced rollout:
-
-   ```text
-   Retail Service Patch
-   rollout_mode = sliced
-   patch_version = v2-bad
-   rollback_on_failure = true
-   ```
-
-   Message: the same failure is contained to the first 5% slice.
-
-4. Show the pipeline language:
-
-   ```text
-   Build retail service patch image
-   Deploy patch and validate checkout health
-   Rollback failed rollout target
-   Stop patch rollout before wider impact
-   ```
-
-For observation mode, run the same workflow with:
+Recommended production integration:
 
 ```text
-rollback_on_failure = false
+Azure Monitor Action Group
+  Email, SMS, voice, webhook, Logic App, or incident tool routing.
+
+GitHub Actions notification hook
+  Emits incident context and can call a configured webhook.
 ```
 
-The pipeline still stops on the failed target, but leaves it patched so the status page can show degradation. Restore the target later with `Retail Service Patch Rollback`.
+Incident payload should include:
 
-## Key Takeaway
+```text
+Patch name
+Failed region or ServiceRing
+Capacity target
+Rollback setting
+Workflow run URL
+```
 
-Multi-region alone reduces infrastructure risk, but it does not automatically reduce deployment blast radius. Sliced production rollout plus synthetic checkout validation changes the failure mode:
+## Patch Naming
+
+Patch names are intentionally neutral.
+
+```text
+Patch 1 = healthy
+Patch 2 = contains the Purchase bug
+Patch 3 = healthy
+```
+
+## Reliability Outcome
+
+| Area | Current regional rollout | Modernized ServiceRing rollout |
+| --- | --- | --- |
+| First production target | Full region | Small ServiceRing |
+| Initial capacity at risk | 50% | 5% |
+| Detection signal | Regional health or customer failures | Checkout-path synthetic validation |
+| Pipeline behavior | Stop after regional failure | Stop before wider ServiceRings |
+| Recovery | Roll back region | Roll back failed ServiceRing |
+
+Key change:
 
 ```text
 From: detect after a large regional impact
-To: detect in a small production slice and stop automatically
+To: detect in a small production ServiceRing and stop automatically
 ```
+
+## Walkthrough
+
+Public regional status:
+
+```text
+https://retail-retaildemo-bjg2ebhydwemckfr.z02.azurefd.net/
+```
+
+Internal ServiceRings status:
+
+```text
+https://retail-retaildemo-bjg2ebhydwemckfr.z02.azurefd.net/service-rings
+```
+
+Regional observation:
+
+```text
+Retail Service Patch
+rollout_mode = current
+patch = Patch 2
+rollback_on_failure = false
+```
+
+ServiceRing observation:
+
+```text
+Retail Service ServiceRing Patch Deploy
+service_ring = eastus-ring0
+patch = Patch 2
+```
+
+Production-safe rollout:
+
+```text
+Retail Service Patch
+rollout_mode = service-rings
+patch = Patch 2
+rollback_on_failure = true
+```
+

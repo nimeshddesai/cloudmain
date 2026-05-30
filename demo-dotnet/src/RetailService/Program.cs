@@ -38,11 +38,11 @@ app.MapPost("/cart/items", (AddItemToCartRequest request, RetailStore store) =>
 app.MapPost("/purchase", (PurchaseItemRequest request, RetailStore store, IConfiguration configuration) =>
 {
     var version = configuration["Demo:Version"] ?? "v1";
-    if (version.Equals("v2-bad", StringComparison.OrdinalIgnoreCase))
+    if (PatchBehavior.IsBuggy(version))
     {
         return Results.Problem(
             title: "Purchase failed",
-            detail: "Payment capture regression in v2-bad.",
+            detail: "Payment capture regression detected.",
             statusCode: StatusCodes.Status500InternalServerError);
     }
 
@@ -60,6 +60,15 @@ app.Run();
 
 public partial class Program
 {
+}
+
+internal static class PatchBehavior
+{
+    public static bool IsBuggy(string version)
+    {
+        return version.Equals("Patch 2", StringComparison.OrdinalIgnoreCase)
+            || version.Equals("patch-2", StringComparison.OrdinalIgnoreCase);
+    }
 }
 
 public sealed class RetailStore

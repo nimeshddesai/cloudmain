@@ -7,6 +7,9 @@ const elements = {
   componentList: document.querySelector("#component-list")
 };
 
+const endpoint = document.querySelector("meta[name='status-endpoint']")?.content || "/api/status";
+const scope = document.querySelector("meta[name='status-scope']")?.content || "public";
+
 const labels = {
   Operational: "Operational",
   Degraded: "Degraded",
@@ -15,7 +18,7 @@ const labels = {
 
 async function loadStatus() {
   try {
-    const response = await fetch("/api/status", { cache: "no-store" });
+    const response = await fetch(endpoint, { cache: "no-store" });
     if (!response.ok) {
       throw new Error(`Status request failed: ${response.status}`);
     }
@@ -35,14 +38,14 @@ function render(status) {
   const overall = normalizeStatus(status.overallStatus);
   elements.summary.className = `summary ${statusClass(overall)}`;
   elements.overallStatus.textContent = overall === "Operational"
-    ? "All Systems Operational"
+    ? scope === "service-rings" ? "All ServiceRings Operational" : "All Systems Operational"
     : overall === "Degraded"
-      ? "Some Services Degraded"
+      ? scope === "service-rings" ? "Some ServiceRings Degraded" : "Some Services Degraded"
       : "Status Unavailable";
   elements.overallDetail.textContent = overall === "Operational"
-    ? "Retail services are operating normally."
+    ? scope === "service-rings" ? "All production ServiceRings are operating normally." : "Retail services are operating normally."
     : overall === "Degraded"
-      ? "One or more retail service components are experiencing degraded availability."
+      ? scope === "service-rings" ? "One or more production ServiceRings are experiencing degraded availability." : "One or more retail service components are experiencing degraded availability."
       : "Current service status could not be refreshed.";
 
   elements.lastUpdated.textContent = `Last updated ${formatTime(status.generatedAtUtc)}`;

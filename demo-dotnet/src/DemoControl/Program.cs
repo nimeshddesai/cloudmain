@@ -11,6 +11,7 @@ var topology = DemoTopology.Create();
 var targets = options.Mode switch
 {
     "current" => topology.Current,
+    "service-rings" => topology.Sliced,
     "sliced" => topology.Sliced,
     _ => throw new ArgumentException($"Unknown mode '{options.Mode}'.")
 };
@@ -127,12 +128,12 @@ static void PrintHelp()
     Console.WriteLine("CloudMain Retail Demo Control");
     Console.WriteLine();
     Console.WriteLine("Usage:");
-    Console.WriteLine("  dotnet run --project demo-dotnet/src/DemoControl -- current --version v2-bad --url https://retail-demo.example.com --synthetic-key <secret>");
-    Console.WriteLine("  dotnet run --project demo-dotnet/src/DemoControl -- sliced --version v2-bad --url https://retail-demo.example.com --synthetic-key <secret>");
+    Console.WriteLine("  dotnet run --project demo-dotnet/src/DemoControl -- current --version \"Patch 2\" --url https://retail-demo.example.com --synthetic-key <secret>");
+    Console.WriteLine("  dotnet run --project demo-dotnet/src/DemoControl -- service-rings --version \"Patch 2\" --url https://retail-demo.example.com --synthetic-key <secret>");
     Console.WriteLine();
     Console.WriteLine("Modes:");
     Console.WriteLine("  current   East US 50%, then West US 50%.");
-    Console.WriteLine("  sliced    East US Ring0 5%, East US Ring1 45%, West US Ring0 5%, West US Ring1 45%.");
+    Console.WriteLine("  service-rings    East US Ring0 5%, East US Ring1 45%, West US Ring0 5%, West US Ring1 45%.");
 }
 
 internal sealed record DemoOptions(
@@ -146,11 +147,11 @@ internal sealed record DemoOptions(
     {
         if (args.Length == 0 || args.Contains("--help") || args.Contains("-h"))
         {
-            return new DemoOptions("current", "v2-bad", "http://localhost:5000", null, true);
+            return new DemoOptions("current", "Patch 2", "http://localhost:5000", null, true);
         }
 
         var mode = args[0].ToLowerInvariant();
-        var version = "v2-bad";
+        var version = "Patch 2";
         var serviceUrl = "http://localhost:5000";
         string? syntheticKey = null;
 

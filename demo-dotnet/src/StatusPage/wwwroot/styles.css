@@ -37,6 +37,17 @@ body {
   margin-bottom: 22px;
 }
 
+.view-link {
+  color: #0969da;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.view-link:hover {
+  text-decoration: underline;
+}
+
 .eyebrow {
   margin: 0 0 4px;
   color: var(--muted);
