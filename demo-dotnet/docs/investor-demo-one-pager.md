@@ -16,6 +16,8 @@ The bad patch intentionally breaks only `Purchase`, while catalog and cart still
 
 Many customers already run in multiple regions, but deploy one full region at a time. Metrics may exist at region level, yet detection often happens only after a large customer impact.
 
+### Customer Runtime Flow
+
 ```mermaid
 flowchart LR
     C["Clients"] --> AFD["Azure Front Door"]
@@ -23,8 +25,16 @@ flowchart LR
     AFD --> WUS["West US service\n50% capacity"]
     EUS --> DB["Purchase database"]
     WUS --> DB
+```
+
+### Deployment Flow
+
+```mermaid
+flowchart LR
     P["Patch pipeline"] --> EUS
     P -. "wait, then continue" .-> WUS
+    EUS["East US service\n50% capacity"]
+    WUS["West US service\n50% capacity"]
 ```
 
 ### Challenge
@@ -58,6 +68,8 @@ Stop before West US
 
 We help re-architect production capacity into smaller slices while keeping the same total regional capacity. The first production deployment goes to a small slice, then expands only after checkout validation passes.
 
+### Customer Runtime Flow
+
 ```mermaid
 flowchart LR
     C["Clients"] --> AFD["Azure Front Door"]
@@ -69,10 +81,20 @@ flowchart LR
     E1 --> DB
     W0 --> DB
     W1 --> DB
+```
+
+### Deployment Flow
+
+```mermaid
+flowchart LR
     P["Patch pipeline"] --> E0
     P -. "only if healthy" .-> E1
     P -. "only if healthy" .-> W0
     P -. "only if healthy" .-> W1
+    E0["East US Ring 0\n5% capacity"]
+    E1["East US Ring 1\n45% capacity"]
+    W0["West US Ring 0\n5% capacity"]
+    W1["West US Ring 1\n45% capacity"]
 ```
 
 ### Improvement
@@ -174,4 +196,3 @@ Multi-region alone reduces infrastructure risk, but it does not automatically re
 From: detect after a large regional impact
 To: detect in a small production slice and stop automatically
 ```
-
