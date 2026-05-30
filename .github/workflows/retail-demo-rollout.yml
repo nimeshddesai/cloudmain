@@ -23,6 +23,11 @@ on:
         description: "Known-good service image used for rollback."
         required: true
         default: "acrretaildemo7txptnpdvdf3e.azurecr.io/retail-service:v1"
+      rollback_on_failure:
+        description: "Automatically roll back the failed target."
+        required: true
+        default: true
+        type: boolean
 
 permissions:
   contents: read
@@ -83,6 +88,7 @@ jobs:
           PATCH_IMAGE: ${{ steps.image.outputs.image }}
           PATCH_VERSION: ${{ inputs.patch_version }}
           ROLLOUT_MODE: ${{ inputs.rollout_mode }}
+          ROLLBACK_ON_FAILURE: ${{ inputs.rollback_on_failure }}
           SYNTHETIC_KEY: ${{ secrets.SYNTHETIC_KEY }}
         run: |
           set -euo pipefail
@@ -129,6 +135,7 @@ jobs:
               echo "FAILED_APP=$app_name" >> "$GITHUB_ENV"
               echo "FAILED_SLICE=$slice" >> "$GITHUB_ENV"
               echo "FAILED_CAPACITY=$capacity" >> "$GITHUB_ENV"
+              echo "ROLLBACK_ON_FAILURE=$ROLLBACK_ON_FAILURE" >> "$GITHUB_ENV"
               exit 1
             fi
             echo "::endgroup::"
@@ -139,7 +146,7 @@ jobs:
           echo "Retail service patch rollout completed successfully."
 
       - name: Rollback failed rollout target
-        if: failure() && env.FAILED_APP != ''
+        if: failure() && env.FAILED_APP != '' && env.ROLLBACK_ON_FAILURE == 'true'
         shell: bash
         env:
           STABLE_IMAGE: ${{ inputs.stable_image }}
@@ -151,6 +158,13 @@ jobs:
             --name "$FAILED_APP" \
             --image "$STABLE_IMAGE" \
             --set-env-vars Demo__Version=v1
+
+      - name: Leave failed target patched for observation
+        if: failure() && env.FAILED_APP != '' && env.ROLLBACK_ON_FAILURE != 'true'
+        run: |
+          echo "Rollback is disabled for this run."
+          echo "Retail service patch remains deployed on $FAILED_SLICE for observation."
+          echo "Run Retail Service Patch Rollback when ready to restore the target."
 
       - name: Stop patch rollout before wider impact
         if: failure() && env.FAILED_APP != ''

@@ -165,6 +165,7 @@ It does not expose patch versions, rollback details, synthetic headers, or inter
    Retail Service Patch
    rollout_mode = current
    patch_version = v2-bad
+   rollback_on_failure = true
    ```
 
    Message: a bad patch can threaten a full 50% regional target.
@@ -175,6 +176,7 @@ It does not expose patch versions, rollback details, synthetic headers, or inter
    Retail Service Patch
    rollout_mode = sliced
    patch_version = v2-bad
+   rollback_on_failure = true
    ```
 
    Message: the same failure is contained to the first 5% slice.
@@ -187,6 +189,14 @@ It does not expose patch versions, rollback details, synthetic headers, or inter
    Rollback failed rollout target
    Stop patch rollout before wider impact
    ```
+
+For observation mode, run the same workflow with:
+
+```text
+rollback_on_failure = false
+```
+
+The pipeline still stops on the failed target, but leaves it patched so the status page can show degradation. Restore the target later with `Retail Service Patch Rollback`.
 
 ## Key Takeaway
 
