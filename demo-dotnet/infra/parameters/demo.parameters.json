@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": { "value": "retaildemo" },
+    "eastLocation": { "value": "eastus" },
+    "westLocation": { "value": "westus" },
+    "retailMinReplicas": { "value": 1 },
+    "syntheticMinReplicas": { "value": 1 },
+    "syntheticIntervalSeconds": { "value": 30 },
+    "retailServiceImage": { "value": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest" },
+    "statusPageImage": { "value": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest" },
+    "syntheticWorkerImage": { "value": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest" }
+  }
+}
