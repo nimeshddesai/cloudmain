@@ -60,30 +60,38 @@ layer catches.
 
 Ask the candidate which checks belong in the PR gate versus CI/CD and why.
 
-### 3. Validate deployments
+### 3. Validate the deployment before cutover
 
-- Run smoke tests and synthetic end-to-end journeys after deployment.
-- Compare errors, latency, saturation, and business signals with a known-good
-  baseline.
-- Make health visible by version, region, and ring.
-- Automatically stop promotion and roll back or roll forward when a gate
-  fails.
+Deploy the build to a staging slot or isolated target without sending it normal
+user traffic. Before cutover:
+
+- confirm the process starts and its critical dependencies are reachable;
+- run smoke tests and synthetic end-to-end journeys against the new instance;
+- compare errors, latency, saturation, and business signals with the known-good
+  version; and
+- send traffic to the new build only when the validation gate passes.
 
 For the interviewer: a synthetic test calls a deployed service as a user would,
 for example by completing a test checkout. A health probe checks a focused
 signal such as process readiness, dependency connectivity, or a critical API
 response.
 
-The deployment pipeline should call these checks against the live service after
-each partition is deployed, evaluate the results for a defined period, and
-block promotion when thresholds are breached.
+The pipeline should call these checks against the new live instance, evaluate
+the results for a defined period, and block cutover when thresholds are
+breached. After cutover, it should continue monitoring and stop promotion or
+roll back when the new version becomes unhealthy.
 
 These checks should run in integration and during rollout so defects are caught
 before they reach wider production traffic.
 
-### 4. Roll out progressively
+### 4. Partition user traffic and roll out builds progressively
 
-A candidate may propose:
+First, look for the candidate to partition users or capacity so a bad build
+cannot affect everyone at once. They should explain the partitioning dimension,
+such as internal versus external users, tenant groups, regions, or a percentage
+of capacity, and how users are assigned consistently.
+
+They may then propose a rollout sequence:
 
 1. Development
 2. Integration
@@ -93,8 +101,8 @@ A candidate may propose:
 
 Look for a small, representative first partition; promotion based on health
 criteria; enough observation time; and support for feature flags, traffic
-shifting, and fast recovery. Integration is one validation partition, not a
-substitute for a production-like canary.
+shifting, and fast recovery. Integration is a validation environment, not a
+user-traffic partition or a substitute for a production-like canary.
 
 ## Partition and recovery probes
 
