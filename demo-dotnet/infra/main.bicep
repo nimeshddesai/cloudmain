@@ -18,6 +18,20 @@ param statusPageImage string = 'mcr.microsoft.com/azuredocs/containerapps-hellow
 @description('Container image for the periodic synthetic worker.')
 param syntheticWorkerImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
 
+@description('Minimum replicas for each retail API app. Use zero for a dormant deployment.')
+@minValue(0)
+@maxValue(1)
+param retailMinReplicas int = 0
+
+@description('Minimum replicas for the synthetic worker. Use zero unless actively running the demo.')
+@minValue(0)
+@maxValue(1)
+param syntheticMinReplicas int = 0
+
+@description('Synthetic checkout interval in seconds when the worker is running.')
+@minValue(30)
+param syntheticIntervalSeconds int = 30
+
 @description('Synthetic key that protected Front Door routing will pass to app code in a later phase.')
 @secure()
 param syntheticKey string
@@ -34,8 +48,6 @@ var acrName = take('acr${safeName}${uniqueString(resourceGroup().id)}', 50)
 var storageAccountName = take('st${safeName}${uniqueString(resourceGroup().id)}', 24)
 var eastEnvName = 'cae-${safeName}-eastus'
 var westEnvName = 'cae-${safeName}-westus'
-var frontDoorProfileName = 'afd-${safeName}'
-var frontDoorEndpointName = 'retail-${safeName}'
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   name: logAnalyticsName
@@ -131,7 +143,7 @@ resource currentEastApp 'Microsoft.App/containerApps@2024-03-01' = {
   properties: {
     managedEnvironmentId: eastEnvironment.id
     configuration: containerAppConfiguration(syntheticKey, acr.properties.loginServer, acr.listCredentials().username, acr.listCredentials().passwords[0].value)
-    template: containerAppTemplate(retailServiceImage, 'eastus', 'eastus', 'v1', appInsights.properties.ConnectionString, syntheticKey)
+    template: containerAppTemplate(retailServiceImage, 'eastus', 'eastus', 'v1', appInsights.properties.ConnectionString, syntheticKey, retailMinReplicas)
   }
 }
 
@@ -147,7 +159,7 @@ resource currentWestApp 'Microsoft.App/containerApps@2024-03-01' = {
   properties: {
     managedEnvironmentId: westEnvironment.id
     configuration: containerAppConfiguration(syntheticKey, acr.properties.loginServer, acr.listCredentials().username, acr.listCredentials().passwords[0].value)
-    template: containerAppTemplate(retailServiceImage, 'westus', 'westus', 'v1', appInsights.properties.ConnectionString, syntheticKey)
+    template: containerAppTemplate(retailServiceImage, 'westus', 'westus', 'v1', appInsights.properties.ConnectionString, syntheticKey, retailMinReplicas)
   }
 }
 
@@ -163,7 +175,7 @@ resource slicedEastRing0App 'Microsoft.App/containerApps@2024-03-01' = {
   properties: {
     managedEnvironmentId: eastEnvironment.id
     configuration: containerAppConfiguration(syntheticKey, acr.properties.loginServer, acr.listCredentials().username, acr.listCredentials().passwords[0].value)
-    template: containerAppTemplate(retailServiceImage, 'eastus', 'eastus-ring0', 'v1', appInsights.properties.ConnectionString, syntheticKey)
+    template: containerAppTemplate(retailServiceImage, 'eastus', 'eastus-ring0', 'v1', appInsights.properties.ConnectionString, syntheticKey, retailMinReplicas)
   }
 }
 
@@ -179,7 +191,7 @@ resource slicedEastRing1App 'Microsoft.App/containerApps@2024-03-01' = {
   properties: {
     managedEnvironmentId: eastEnvironment.id
     configuration: containerAppConfiguration(syntheticKey, acr.properties.loginServer, acr.listCredentials().username, acr.listCredentials().passwords[0].value)
-    template: containerAppTemplate(retailServiceImage, 'eastus', 'eastus-ring1', 'v1', appInsights.properties.ConnectionString, syntheticKey)
+    template: containerAppTemplate(retailServiceImage, 'eastus', 'eastus-ring1', 'v1', appInsights.properties.ConnectionString, syntheticKey, retailMinReplicas)
   }
 }
 
@@ -195,7 +207,7 @@ resource slicedWestRing0App 'Microsoft.App/containerApps@2024-03-01' = {
   properties: {
     managedEnvironmentId: westEnvironment.id
     configuration: containerAppConfiguration(syntheticKey, acr.properties.loginServer, acr.listCredentials().username, acr.listCredentials().passwords[0].value)
-    template: containerAppTemplate(retailServiceImage, 'westus', 'westus-ring0', 'v1', appInsights.properties.ConnectionString, syntheticKey)
+    template: containerAppTemplate(retailServiceImage, 'westus', 'westus-ring0', 'v1', appInsights.properties.ConnectionString, syntheticKey, retailMinReplicas)
   }
 }
 
@@ -211,7 +223,7 @@ resource slicedWestRing1App 'Microsoft.App/containerApps@2024-03-01' = {
   properties: {
     managedEnvironmentId: westEnvironment.id
     configuration: containerAppConfiguration(syntheticKey, acr.properties.loginServer, acr.listCredentials().username, acr.listCredentials().passwords[0].value)
-    template: containerAppTemplate(retailServiceImage, 'westus', 'westus-ring1', 'v1', appInsights.properties.ConnectionString, syntheticKey)
+    template: containerAppTemplate(retailServiceImage, 'westus', 'westus-ring1', 'v1', appInsights.properties.ConnectionString, syntheticKey, retailMinReplicas)
   }
 }
 
@@ -278,7 +290,7 @@ resource syntheticWorkerApp 'Microsoft.App/containerApps@2024-03-01' = {
           env: [
             {
               name: 'FRONT_DOOR_URL'
-              value: 'https://${frontDoorEndpoint.properties.hostName}'
+              value: 'https://${frontDoor.outputs.retailEndpointHostName}'
             }
             {
               name: 'SYNTHETIC_KEY'
@@ -302,7 +314,7 @@ resource syntheticWorkerApp 'Microsoft.App/containerApps@2024-03-01' = {
             }
             {
               name: 'CHECK_INTERVAL_SECONDS'
-              value: '30'
+              value: string(syntheticIntervalSeconds)
             }
             {
               name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
@@ -316,33 +328,29 @@ resource syntheticWorkerApp 'Microsoft.App/containerApps@2024-03-01' = {
         }
       ]
       scale: {
-        minReplicas: 1
+        minReplicas: syntheticMinReplicas
         maxReplicas: 1
       }
     }
   }
 }
 
-resource frontDoorProfile 'Microsoft.Cdn/profiles@2024-02-01' = {
-  name: frontDoorProfileName
-  location: 'global'
-  tags: tags
-  sku: {
-    name: 'Standard_AzureFrontDoor'
+module frontDoor 'modules/front-door.bicep' = {
+  name: 'front-door'
+  params: {
+    safeName: safeName
+    tags: tags
+    origins: {
+      currentEast: currentEastApp.properties.configuration.ingress.fqdn
+      currentWest: currentWestApp.properties.configuration.ingress.fqdn
+      eastRing0: slicedEastRing0App.properties.configuration.ingress.fqdn
+      eastRing1: slicedEastRing1App.properties.configuration.ingress.fqdn
+      westRing0: slicedWestRing0App.properties.configuration.ingress.fqdn
+      westRing1: slicedWestRing1App.properties.configuration.ingress.fqdn
+      status: statusPageApp.properties.configuration.ingress.fqdn
+    }
   }
 }
-
-resource frontDoorEndpoint 'Microsoft.Cdn/profiles/afdEndpoints@2024-02-01' = {
-  parent: frontDoorProfile
-  name: frontDoorEndpointName
-  location: 'global'
-  properties: {
-    enabledState: 'Enabled'
-  }
-}
-
-// Front Door origin groups, origins, routes, and protected synthetic header rules
-// will be expanded after the first Azure deployment confirms generated Container App FQDNs.
 
 func containerAppConfiguration(key string, registryServer string, registryUsername string, registryPassword string) object => {
   activeRevisionsMode: 'Single'
@@ -427,7 +435,7 @@ func syntheticWorkerConfiguration(key string, statusConnectionString string, reg
   ]
 }
 
-func containerAppTemplate(image string, region string, slice string, version string, appInsightsConnectionString string, key string) object => {
+func containerAppTemplate(image string, region string, slice string, version string, appInsightsConnectionString string, key string, minReplicas int) object => {
   containers: [
     {
       name: 'retail-service'
@@ -461,7 +469,7 @@ func containerAppTemplate(image string, region string, slice string, version str
     }
   ]
   scale: {
-    minReplicas: 1
+    minReplicas: minReplicas
     maxReplicas: 1
   }
 }
@@ -469,7 +477,10 @@ func containerAppTemplate(image string, region string, slice string, version str
 output acrLoginServer string = acr.properties.loginServer
 output statusStorageAccountName string = statusStorage.name
 output appInsightsConnectionString string = appInsights.properties.ConnectionString
-output frontDoorEndpointHostName string = frontDoorEndpoint.properties.hostName
+output frontDoorProfileName string = frontDoor.outputs.profileName
+output frontDoorEndpointHostName string = frontDoor.outputs.retailEndpointHostName
+output simpleEndpointHostName string = frontDoor.outputs.simpleEndpointHostName
+output statusEndpointHostName string = frontDoor.outputs.statusEndpointHostName
 output currentEastFqdn string = currentEastApp.properties.configuration.ingress.fqdn
 output currentWestFqdn string = currentWestApp.properties.configuration.ingress.fqdn
 output slicedEastRing0Fqdn string = slicedEastRing0App.properties.configuration.ingress.fqdn

@@ -1,6 +1,7 @@
 # Azure Infrastructure
 
-This folder contains Bicep infrastructure for the .NET retail observability environment.
+This folder contains the complete Bicep infrastructure and lifecycle scripts for
+the .NET retail observability environment.
 
 ## Scope
 
@@ -13,7 +14,10 @@ The template prepares:
 - Container Apps for the current deployment model
 - Container Apps for the ServiceRings deployment model
 - Container App for the status page
-- Azure Front Door Standard profile and endpoint scaffold
+- Azure Front Door Standard profile
+- Retail, simple, and status endpoints
+- Current, status, and Service Ring origin groups and origins
+- Header-directed Service Ring routing rules
 
 ## Current topology
 
@@ -109,11 +113,23 @@ az deployment group create `
   --parameters @demo-dotnet/infra/phase8-first-deploy.parameters.json
 ```
 
-## Notes
+## Operating modes
 
-`phase8-first-deploy.parameters.json` is subscription/resource-group specific because it references the ACR login server created during the first deployment.
+Use `parameters/dormant.parameters.json` for the default cost-safe deployment.
+It sets retail and synthetic minimum replicas to zero.
 
-Front Door origin groups, origins, routes, and protected synthetic routing rules are intentionally staged after the first Container Apps deployment because the generated Container App FQDNs should be confirmed first.
+Use `parameters/demo.parameters.json` for a live demo with one replica per
+retail target and the synthetic worker enabled.
+
+The lifecycle scripts under `scripts/` validate, deploy, start, stop, and destroy
+the environment. `stop-demo.ps1 -RemoveFrontDoor` removes the Front Door profile
+because disabling an endpoint does not eliminate the profile base fee.
+
+`phase8-first-deploy.parameters.json` is retained as historical deployment
+context. New deployments should use the parameter files under `parameters/`.
+
+The unrelated Free tier `speech-retaildemo-video` resource is intentionally
+excluded. See `../docs/azure-architecture.md`.
 
 ## GitHub Actions rollout pipeline
 
@@ -138,6 +154,18 @@ AZURE_TENANT_ID=f403cee1-ccfb-4c1a-adc0-fefb2bea00a8
 AZURE_SUBSCRIPTION_ID=9b11704c-1b3b-4688-94b0-805459ccf099
 SYNTHETIC_KEY
 ```
+
+Required GitHub environment variables:
+
+```text
+AZURE_RESOURCE_GROUP
+AZURE_ACR_NAME
+AZURE_ACR_LOGIN_SERVER
+AZURE_FRONT_DOOR_URL
+```
+
+Populate these from the outputs of `main.bicep`; do not hard-code generated
+resource names or hostnames in the workflow.
 
 The Azure federated credential trusts:
 

@@ -21,9 +21,9 @@ on:
           - "Patch 2"
           - "Patch 3"
       stable_image:
-        description: "Known-good service image used for rollback."
+        description: "Known-good service image tag or fully qualified image used for rollback."
         required: true
-        default: "acrretaildemo7txptnpdvdf3e.azurecr.io/retail-service:v1"
+        default: "retail-service:v1"
       rollback_on_failure:
         description: "Automatically roll back the failed target."
         required: true
@@ -35,10 +35,10 @@ permissions:
   id-token: write
 
 env:
-  RESOURCE_GROUP: rg-cloudmain-retail-demo
-  ACR_NAME: acrretaildemo7txptnpdvdf3e
-  ACR_LOGIN_SERVER: acrretaildemo7txptnpdvdf3e.azurecr.io
-  FRONT_DOOR_URL: https://retail-retaildemo-bjg2ebhydwemckfr.z02.azurefd.net
+  RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+  ACR_NAME: ${{ vars.AZURE_ACR_NAME }}
+  ACR_LOGIN_SERVER: ${{ vars.AZURE_ACR_LOGIN_SERVER }}
+  FRONT_DOOR_URL: ${{ vars.AZURE_FRONT_DOOR_URL }}
 
 jobs:
   rollout:
@@ -63,6 +63,18 @@ jobs:
 
       - name: Ensure Azure Container Apps CLI support
         run: az extension add --name containerapp --upgrade
+
+      - name: Validate deployment configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          required=(RESOURCE_GROUP ACR_NAME ACR_LOGIN_SERVER FRONT_DOOR_URL)
+          for name in "${required[@]}"; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "::error::GitHub environment variable $name is required."
+              exit 1
+            fi
+          done
 
       - name: Build retail service patch image
         id: image
@@ -154,6 +166,9 @@ jobs:
           STABLE_IMAGE: ${{ inputs.stable_image }}
         run: |
           set -euo pipefail
+          if [[ "$STABLE_IMAGE" != */* ]]; then
+            STABLE_IMAGE="$ACR_LOGIN_SERVER/$STABLE_IMAGE"
+          fi
           echo "Rolling back $FAILED_SERVICE_RING (${FAILED_CAPACITY}% capacity target) to the known-good retail service image."
           az containerapp update \
             --resource-group "$RESOURCE_GROUP" \
