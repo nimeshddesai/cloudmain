@@ -20,6 +20,11 @@ The site includes lightweight HTML structure checks using Node's built-in test r
 npm test
 ```
 
+## Interview question bank
+
+The [`question-bank`](question-bank/README.md) contains interviewer guides for
+coding and system design interviews.
+
 ## Retail observability demo
 
 The engineering demo lives under `demo/` and is separate from the CloudMain marketing site. It models a retail service deployed across two regions and two production rings:
