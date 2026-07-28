@@ -1,8 +1,8 @@
 # Interview question bank
 
-This question bank contains reusable interviewer guides for CloudMain
-interviews. Each guide includes the candidate prompt, suggested probes,
-expected discussion areas, and a scoring rubric.
+This question bank contains reusable interviewer guides. Each guide includes
+the candidate prompt, suggested probes, expected discussion areas, and a
+scoring rubric.
 
 ## Categories
 
