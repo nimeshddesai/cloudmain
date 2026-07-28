@@ -46,16 +46,17 @@ layer catches.
 - Use unit tests for business logic and component tests for service behavior.
 - Use contract and integration tests for APIs, schemas, dependencies, and data
   stores.
-- Keep most checks fast and deterministic; do not depend only on end-to-end
-  tests.
 
 ### 2. Add pipeline gates
 
-- Run fast checks in the PR gate and broader integration, compatibility,
-  security, and artifact checks in CI.
+- Run unit, component, and contract checks in the PR gate, with broader
+  integration, compatibility, security, and artifact checks in CI.
 - Build an immutable artifact once and promote it through every environment.
-- Validate configuration and database migrations before rollout.
-- Require additional approval for high-risk changes.
+- Validate deployment configuration against a schema and test database
+  migrations on production-like data, including backward compatibility and
+  rollback behavior.
+- Require explicit PR approval before merging high-risk code and a deployment
+  approval before promoting it to production.
 
 Ask the candidate which checks belong in the PR gate versus CI/CD and why.
 
@@ -68,6 +69,15 @@ Ask the candidate which checks belong in the PR gate versus CI/CD and why.
 - Automatically stop promotion and roll back or roll forward when a gate
   fails.
 
+For the interviewer: a synthetic test calls a deployed service as a user would,
+for example by completing a test checkout. A health probe checks a focused
+signal such as process readiness, dependency connectivity, or a critical API
+response.
+
+The deployment pipeline should call these checks against the live service after
+each partition is deployed, evaluate the results for a defined period, and
+block promotion when thresholds are breached.
+
 These checks should run in integration and during rollout so defects are caught
 before they reach wider production traffic.
 
@@ -77,7 +87,7 @@ A candidate may propose:
 
 1. Development
 2. Integration
-3. Ring 0 or an internal canary
+3. A lower ring or internal canary
 4. Broader public-production rings
 5. Sovereign clouds
 
@@ -86,11 +96,11 @@ criteria; enough observation time; and support for feature flags, traffic
 shifting, and fast recovery. Integration is one validation partition, not a
 substitute for a production-like canary.
 
-## Deep-dive probes
+## Partition and recovery probes
 
 Select a few based on the candidate's answer:
 
-- How would you select Ring 0 users, capacity, and observation time?
+- How would you select lower-ring users, capacity, and observation time?
 - What if a defect affects only one region, tenant type, or dependency?
 - How would you handle a database migration that cannot be rolled back?
 - Which signals should automatically halt a rollout?
