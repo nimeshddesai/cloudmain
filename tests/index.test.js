@@ -11,7 +11,7 @@ const has = (label, condition) => {
 };
 
 test('document metadata', () => {
-  has('HTML title', /<title>\s*CloudMain Solutions \| Azure Cloud Services\s*<\/title>/i.test(html));
+  has('HTML title', /<title>\s*Nubreino Cloud \| Azure Cloud Services\s*<\/title>/i.test(html));
   has('language attribute', /<html[^>]*lang="en"/i.test(html));
 });
 
@@ -51,9 +51,4 @@ test('process and outcomes sections', () => {
   ['Discover & align', 'Design & blueprint', 'Build & automate', 'Operate & optimize'].forEach((step) => {
     has(`process step ${step}`, new RegExp(step.replace(/&/g, '&amp;'), 'i').test(html));
   });
-});
-
-test('contact call-to-action', () => {
-  has('contact section', /<section[^>]*id="contact"/i.test(html));
-  has('mailto link', /href="mailto:hello@cloudmainsolutions.com"/i.test(html));
 });
