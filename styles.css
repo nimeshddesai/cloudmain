@@ -527,6 +527,7 @@ footer p {
 /* Values section */
 .values-grid {
   display: flex;
+  flex-wrap: wrap;
   align-items: stretch;
   background: linear-gradient(135deg, #0f6cbd, #0a4e8c);
   border-radius: 16px;
@@ -535,7 +536,7 @@ footer p {
 }
 
 .value-tile {
-  flex: 1;
+  flex: 1 1 120px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -543,11 +544,18 @@ footer p {
   font-weight: 800;
   color: #fff;
   padding: 28px 16px;
-  white-space: nowrap;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  text-align: center;
   transition: background 0.2s;
   position: relative;
+}
+
+.value-initial {
+  font-style: normal;
+  color: var(--accent);
+  font-size: 1.25em;
+  line-height: 1;
 }
 
 .value-tile:hover {
@@ -562,4 +570,17 @@ footer p {
   height: 60%;
   width: 1px;
   background: rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 480px) {
+  .values-grid {
+    flex-direction: column;
+  }
+
+  .value-tile + .value-tile::before {
+    top: 0;
+    left: 10%;
+    width: 80%;
+    height: 1px;
+  }
 }
