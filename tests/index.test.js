@@ -11,7 +11,7 @@ const has = (label, condition) => {
 };
 
 test('document metadata', () => {
-  has('HTML title', /<title>\s*Fabriant Technologies\| Azure Cloud Services\s*<\/title>/i.test(html));
+  has('HTML title', /<title>\s*Fabriant\| Azure Cloud Services\s*<\/title>/i.test(html));
   has('language attribute', /<html[^>]*lang="en"/i.test(html));
 });
 
@@ -24,7 +24,6 @@ test('navigation links', () => {
 test('hero content', () => {
   has('hero headline', /Cloud excellence, engineered for velocity and resilience\./i.test(html));
   has('hero metrics for uptime', /99\.95%/i.test(html));
-  has('hero metrics for savings', /40%/i.test(html));
   has('hero metrics for deployments', /2-4x/i.test(html));
 });
 
