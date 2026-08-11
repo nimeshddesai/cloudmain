@@ -30,7 +30,7 @@ jobs:
       - name: Build static site
         run: |
           mkdir -p build
-          cp -R index.html staticwebapp.config.json images build/
+          cp -R index.html styles.css staticwebapp.config.json images build/
 
       - name: Deploy to Azure Static Web Apps
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
