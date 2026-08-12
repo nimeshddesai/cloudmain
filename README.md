@@ -20,56 +20,6 @@ The site includes lightweight HTML structure checks using Node's built-in test r
 npm test
 ```
 
-## Interview question bank
-
-The [`question-bank`](question-bank/README.md) contains interviewer guides for
-coding and system design interviews.
-
-## Retail observability demo
-
-The engineering demo lives under `demo/` and is separate from the CloudMain marketing site. It models a retail service deployed across two regions and two production rings:
-
-- `USEA/ring0` on port `3100` with 5% capacity
-- `USEA/ring1` on port `3101` with 45% capacity
-- `USWE/ring0` on port `3200` with 5% capacity
-- `USWE/ring1` on port `3201` with 45% capacity
-
-The service exposes:
-
-- `GET /items/:id` for `GetItem`
-- `POST /cart/items` for `AddItemToCart`
-- `POST /purchase` for `PurchaseItem`
-- `GET /metrics` for API, synthetic, dependency, and version metrics
-
-Start the demo services from the repository root:
-
-```bash
-npm run demo:init
-npm run demo:services
-```
-
-In a second terminal, run synthetic checkout traffic against all rings:
-
-```bash
-npm run demo:synthetic
-```
-
-To demonstrate a failed patch, run:
-
-```bash
-npm run demo:rollout:bad
-```
-
-The `v2-bad` patch intentionally breaks only `PurchaseItem`. `GetItem` and `AddItemToCart` continue to pass. The pipeline deploys to `USEA/ring0`, runs synthetic checkout traffic, reads `/metrics`, fails the health gate, stops rollout, and rolls the ring back to `v1`.
-
-To demonstrate a successful rollout:
-
-```bash
-npm run demo:rollout:good
-```
-
-The gate criteria are configured in `demo/config/topology.json`.
-
 ## Deploying to Azure Static Web Apps
 
 1. Create an Azure Static Web App and set the `AZURE_STATIC_WEB_APPS_API_TOKEN` secret in your repository settings.
@@ -78,3 +28,26 @@ The gate criteria are configured in `demo/config/topology.json`.
    - package the static assets in `build/`,
    - upload the site to Azure.
 3. If you need custom routing, adjust `staticwebapp.config.json` and rerun the workflow.
+
+## Deploying to Netlify via GitHub
+
+### One-time setup
+
+1. **Create a Netlify site** – Log in to [app.netlify.com](https://app.netlify.com), click **Add new site → Import an existing project**, and connect your GitHub repository. Netlify will detect [`netlify.toml`](netlify.toml) automatically; no extra UI config is needed.
+
+### How it works
+
+Netlify's native GitHub integration handles everything automatically — no GitHub Actions workflow or secrets are required:
+
+- **Push to `main`** → Netlify runs the build command from `netlify.toml` (`npm ci && npm test`, then copies assets to `build/`) and publishes to production.
+- **Pull request** → Netlify automatically deploys a **draft preview** URL and posts it as a commit status check on the PR.
+- SPA fallback redirect, security headers, and asset cache policies are all defined in [`netlify.toml`](netlify.toml).
+
+### Local preview
+
+```bash
+npm install -g netlify-cli
+netlify dev
+```
+
+This serves the site locally using the same redirect and header rules defined in `netlify.toml`.

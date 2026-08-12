@@ -8,6 +8,7 @@
     "demo:synthetic": "node demo/synthetic/run-checkout-all.js",
     "demo:rollout:bad": "node demo/pipeline/rollout.js v2-bad",
     "demo:rollout:good": "node demo/pipeline/rollout.js v2",
-    "test": "node --test"
+    "test": "node --test",
+    "build": "mkdir -p build && cp -R index.html styles.css images build/"
   }
 }

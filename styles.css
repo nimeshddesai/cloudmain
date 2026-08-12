@@ -304,16 +304,12 @@ section {
 }
 
 .person-avatar {
-  width: 56px;
-  height: 56px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
-  background: rgba(15, 108, 189, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--azure);
+  object-fit: cover;
+  display: block;
+  border: 2px solid rgba(15, 108, 189, 0.2);
   margin-bottom: 14px;
 }
 
@@ -335,6 +331,7 @@ section {
   margin: 0 0 14px;
   line-height: 1.55;
   font-style: italic;
+  text-align: justify;
 }
 
 .linkedin-link {
