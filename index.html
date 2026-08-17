@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/x-icon" href="images/Fabriant.ico" />
-    <title>Fabriant| Weaving Intelligence into Cloud</title>
+    <title>Fabriant | Weaving Intelligence into Cloud</title>
     <link rel="stylesheet" href="styles.css?v=2" />
   </head>
   <body>
@@ -16,7 +16,10 @@
             <span data-company></span> <small style="display:block; color: var(--muted); font-weight: 600;">Weaving Intelligence into Cloud</small>
           </div>
         </a>
-        <div class="nav-links">
+        <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-links">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="nav-links" id="nav-links">
           <a href="#services">Services</a>
           <a href="#process">Approach</a>
           <a href="#outcomes">Outcomes</a>
@@ -259,6 +262,21 @@
       if (message) body += "\n" + message;
       this.href = "mailto:contact@fabriant.com?subject=Enquiry%20from%20website" +
                   (body ? "&body=" + encodeURIComponent(body) : "");
+    });
+
+    // Hamburger toggle
+    var navToggle = document.getElementById("nav-toggle");
+    var navLinks  = document.getElementById("nav-links");
+    navToggle.addEventListener("click", function() {
+      var isOpen = navLinks.classList.toggle("is-open");
+      navToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    });
+    // Close menu when any nav link is tapped
+    navLinks.querySelectorAll("a").forEach(function(link) {
+      link.addEventListener("click", function() {
+        navLinks.classList.remove("is-open");
+        navToggle.setAttribute("aria-expanded", "false");
+      });
     });
   </script>
   </body>

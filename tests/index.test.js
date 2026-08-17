@@ -11,7 +11,7 @@ const has = (label, condition) => {
 };
 
 test('document metadata', () => {
-  has('HTML title', /<title>\s*Fabriant\| Weaving Intelligence into Cloud\s*<\/title>/i.test(html));
+  has('HTML title', /<title>\s*Fabriant\ | Weaving Intelligence into Cloud\s*<\/title>/i.test(html));
   has('language attribute', /<html[^>]*lang="en"/i.test(html));
 });
 
@@ -19,6 +19,15 @@ test('navigation links', () => {
   ['services', 'process', 'outcomes', 'team', 'contact'].forEach((id) => {
     has(`nav link for #${id}`, new RegExp(`<a[^>]*href="#${id}"`, 'i').test(html));
   });
+});
+
+test('mobile hamburger menu', () => {
+  has('hamburger toggle button', /<button[^>]*id="nav-toggle"/i.test(html));
+  has('toggle has aria-label', /<button[^>]*aria-label="Toggle navigation"/i.test(html));
+  has('toggle has aria-expanded', /<button[^>]*aria-expanded="false"/i.test(html));
+  has('nav-links has id for JS', /<div[^>]*id="nav-links"/i.test(html));
+  has('hamburger JS toggle handler', /navToggle\.addEventListener\("click"/.test(html));
+  has('nav links close on click', /navLinks\.classList\.remove\("is-open"\)/.test(html));
 });
 
 test('hero content', () => {
