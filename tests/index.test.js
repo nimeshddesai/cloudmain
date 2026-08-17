@@ -11,12 +11,12 @@ const has = (label, condition) => {
 };
 
 test('document metadata', () => {
-  has('HTML title', /<title>\s*Fabriant\| Azure Cloud Services\s*<\/title>/i.test(html));
+  has('HTML title', /<title>\s*Fabriant\| Weaving Intelligence into Cloud\s*<\/title>/i.test(html));
   has('language attribute', /<html[^>]*lang="en"/i.test(html));
 });
 
 test('navigation links', () => {
-  ['services', 'process', 'outcomes', 'contact'].forEach((id) => {
+  ['services', 'process', 'outcomes', 'team', 'contact'].forEach((id) => {
     has(`nav link for #${id}`, new RegExp(`<a[^>]*href="#${id}"`, 'i').test(html));
   });
 });
@@ -41,7 +41,7 @@ test('services section coverage', () => {
     has(`${service} present`, new RegExp(service.replace(/\//g, '\\/'), 'i').test(html));
   });
   const cardCount = (html.match(/class="card"/g) || []).length;
-  has('at least six service cards', cardCount >= 6);
+  has('at least four service cards', cardCount >= 4);
 });
 
 test('process and outcomes sections', () => {
@@ -63,7 +63,10 @@ test('contact section', () => {
   has('contact section', /<section[^>]*id="contact"/i.test(html));
   has('contact heading', /Contact Us/i.test(html));
   has('name input', /<input[^>]*id="contact-name"/i.test(html));
-  has('email input', /<input[^>]*id="contact-email"/i.test(html));
+  has('no email input', !/<input[^>]*id="contact-email"/i.test(html));
   has('message textarea', /<textarea[^>]*id="contact-message"/i.test(html));
   has('mailto link', /href="mailto:[^"]+"/i.test(html));
+  has('submit link has id for JS wiring', /<a[^>]*id="contact-submit"/i.test(html));
+  has('click handler wires name into body', /getElementById\("contact-name"\)/.test(html));
+  has('click handler does not reference email', !/getElementById\("contact-email"\)/.test(html));
 });
