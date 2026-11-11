@@ -1,0 +1,31 @@
+---
+layout: layouts/base.njk
+title: Services | Fabriant
+description: Release reliability, secure AKS and DevSecOps, Azure foundations, AI production readiness and specialist capacity. Five ways Fabriant helps, each tied to a problem your business already feels.
+permalink: /services/
+---
+      <section id="offerings" class="page-top">
+        <div class="section-header">
+          <h1>What we do</h1>
+          <p>Five ways we help, each tied to a problem your business already feels.</p>
+        </div>
+        <div class="cards offering-cards">
+          {%- for offering in offerings %}
+          <div class="card offering" id="{{ offering.id }}">
+            <h3>{{ offering.name }}</h3>
+            <p class="offering-value">{{ offering.value }}</p>
+            <ul class="list">
+              {%- for point in offering.points %}
+              <li><span class="dot"></span>{{ point }}</li>
+              {%- endfor %}
+            </ul>
+            <p class="offering-start"><strong>{{ offering.startLabel }}</strong> {{ offering.start }}</p>
+          </div>
+          {%- endfor %}
+        </div>
+        <p class="section-note"><strong>Start small, scale with confidence.</strong> Each offering can begin as a focused sprint and grow into an ongoing engagement.</p>
+        <p class="small-print">Not included in the sprints: large migrations, 24x7 operations, penetration testing, formal certification audits, and reservation or savings-plan purchases.</p>
+        <div class="section-actions">
+          <a class="cta-secondary" href="/how-to-start/">See how to start</a>
+        </div>
+      </section>

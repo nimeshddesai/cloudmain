@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title }}</title>
+    <meta name="description" content="{{ description }}" />
+    {%- if noindex %}
+    <meta name="robots" content="noindex" />
+    {%- else %}
+    <link rel="canonical" href="{{ site.url }}{{ page.url }}" />
+    {%- endif %}
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="{{ site.url }}{{ page.url }}" />
+    <meta property="og:title" content="{{ ogTitle or title }}" />
+    <meta property="og:description" content="{{ ogDescription or description }}" />
+    <meta property="og:image" content="{{ site.url }}/images/Fabriant.png" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="icon" type="image/x-icon" href="/images/Fabriant.ico" />
+    <link rel="stylesheet" href="/assets/css/base.css?v={{ site.assetVersion }}" />
+    <link rel="stylesheet" href="/assets/css/layout.css?v={{ site.assetVersion }}" />
+    <link rel="stylesheet" href="/assets/css/components.css?v={{ site.assetVersion }}" />
+    <script src="/assets/js/main.js?v={{ site.assetVersion }}" defer></script>
+  </head>
+  <body>
+    {% include "partials/header.njk" %}
+
+    <main id="top">
+{{ content | safe }}
+      {%- if not hideCtaBand %}
+      {% include "partials/cta-band.njk" %}
+      {%- endif %}
+    </main>
+
+    {% include "partials/footer.njk" %}
+  </body>
+</html>

@@ -1,0 +1,119 @@
+---
+layout: layouts/base.njk
+title: Fabriant | Weaving Intelligence into Cloud
+ogTitle: Fabriant | Azure platform engineering
+description: Fabriant is a specialist Azure platform-engineering partner. Safer releases, stronger controls and leaner cloud spend, delivered in fixed-scope sprints. Start with a complimentary 1-week cloud assessment.
+ogDescription: Safer releases. Stronger controls. Leaner cloud spend. Start with a complimentary 1-week cloud assessment.
+---
+      <!-- Hero -->
+      <section class="hero">
+        <div>
+          <div class="badge">Azure platform engineering</div>
+          <h1>Safer releases. Stronger controls. Leaner cloud spend.</h1>
+          <p>
+            Fabriant is a specialist Azure platform-engineering partner. We fix the release, security and cost problems in your Azure estate, in fixed-scope sprints, and hand the work back to your team.
+          </p>
+          <div class="hero-actions">
+            <a class="cta" href="/contact/?topic=free-assessment">Request a free 1-week assessment</a>
+            <a class="cta-secondary" href="/how-to-start/">See how to start</a>
+          </div>
+          <ul class="proof-strip">
+            <li>Complimentary 1-week assessment</li>
+            <li>Fixed-scope sprints</li>
+            <li>Microsoft-certified engineers (AZ-305, AZ-104)</li>
+            <li>One team across time zones</li>
+          </ul>
+        </div>
+        <div class="hero-card">
+          <div class="hero-card-label">Start here · Complimentary</div>
+          <h3>Cloud Assessment Sprint</h3>
+          <p class="hero-card-sub">One week. Read-only access. No fee, no obligation.</p>
+          <ul class="list">
+            <li><span class="dot"></span>One subscription or priority workload</li>
+            <li><span class="dot"></span>Reliability, security and cost hotspots</li>
+            <li><span class="dot"></span>Executive readout and quick wins</li>
+            <li><span class="dot"></span>A recommended next step</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Overview -->
+      <section id="overview">
+        <div class="section-header">
+          <h2>Azure problems are business problems</h2>
+          <p>A failed release costs revenue. An unexplained bill costs margin. A weak control costs you the audit. We work on the Azure platform underneath your product so those stop happening.</p>
+        </div>
+        <div class="cards cards-4">
+          <div class="card">
+            <h3>Releases that break production</h3>
+            <p class="card-text">Health-gated rollouts that catch a bad release early and roll it back before customers feel it.</p>
+          </div>
+          <div class="card">
+            <h3>An Azure bill that keeps rising</h3>
+            <p class="card-text">Clear cost visibility, rightsizing and tagging, with savings reported as estimated, implemented and realized.</p>
+          </div>
+          <div class="card">
+            <h3>Audit and security pressure</h3>
+            <p class="card-text">Policy, identity and AKS controls mapped to the evidence your auditors ask for.</p>
+          </div>
+          <div class="card">
+            <h3>A platform team at capacity</h3>
+            <p class="card-text">Certified engineers who join your team and work to your backlog.</p>
+          </div>
+        </div>
+        <div class="segments">
+          <div class="segment">
+            <h3>Growing software companies</h3>
+            <p>B2B SaaS, commerce, fintech and healthtech teams running production on Azure, often on AKS, with a small or no platform team.</p>
+          </div>
+          <div class="segment">
+            <h3>Larger Azure estates</h3>
+            <p>Organisations with many subscriptions and a landing zone whose in-house platform team needs more hands.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Services preview -->
+      <section id="services-preview">
+        <div class="section-header">
+          <h2>What we do</h2>
+          <p>Five ways we help, each tied to a problem your business already feels.</p>
+        </div>
+        <div class="cards cards-5">
+          {%- for offering in offerings %}
+          <a class="card card-link" href="/services/#{{ offering.id }}">
+            <h3>{{ offering.name }}</h3>
+            <p class="card-text">{{ offering.value }}</p>
+          </a>
+          {%- endfor %}
+        </div>
+        <div class="section-actions">
+          <a class="cta-secondary" href="/services/">See all services</a>
+        </div>
+      </section>
+
+      <!-- Outcomes -->
+      <section id="outcomes">
+        <div class="section-header">
+          <h2>Work you can see and keep</h2>
+          <p>Every engagement leaves evidence and assets your team owns.</p>
+        </div>
+        <div class="cards cards-4">
+          <div class="card">
+            <h3>A health-gated release path</h3>
+            <p class="card-text">With automated rollback for the chosen workload.</p>
+          </div>
+          <div class="card">
+            <h3>Risk-ranked findings</h3>
+            <p class="card-text">And a control-to-evidence matrix for your auditors.</p>
+          </div>
+          <div class="card">
+            <h3>A cost baseline</h3>
+            <p class="card-text">With savings tracked as estimated, implemented and realized.</p>
+          </div>
+          <div class="card">
+            <h3>Runbooks and handover</h3>
+            <p class="card-text">So your team runs it after we leave.</p>
+          </div>
+        </div>
+      </section>
