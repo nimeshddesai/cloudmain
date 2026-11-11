@@ -9,6 +9,6 @@
     "demo:rollout:bad": "node demo/pipeline/rollout.js v2-bad",
     "demo:rollout:good": "node demo/pipeline/rollout.js v2",
     "test": "node --test",
-    "build": "mkdir -p build && cp -R index.html styles.css images build/"
+    "build": "mkdir -p build && cp -R index.html styles.css images _redirects build/"
   }
 }

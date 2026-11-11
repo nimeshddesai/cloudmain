@@ -1,53 +1,51 @@
-# CloudMain Solutions
+# Fabriant website
 
-Static website for CloudMain Solutions, highlighting Azure-focused cloud services.
+Static marketing site for Fabriant, a specialist Azure platform-engineering partner.
+Live at https://fabriant.cloud (other Fabriant domains redirect there via `_redirects`).
+
+## Structure
+
+- `index.html` – single-page site: Overview, Offerings, How to start, Process, How we work, Outcomes, About, FAQ, Contact
+- `styles.css` – all styles
+- `images/` – logo, favicon, team and investor images
+- `_redirects` – Netlify domain redirects (all domains → fabriant.cloud)
+- `netlify.toml` – Netlify build, headers and SPA fallback
+- `tests/index.test.js` – content and structure checks, including guardrails against unproven claims and published prices
 
 ## Running locally
 
-Use any static file server from the repository root. For example:
+Use any static file server from the repository root:
 
 ```bash
 python -m http.server 8000
 ```
 
-Then open http://localhost:8000 in your browser.
+Then open http://localhost:8000.
 
 ## Tests
-
-The site includes lightweight HTML structure checks using Node's built-in test runner:
 
 ```bash
 npm test
 ```
 
-## Deploying to Azure Static Web Apps
+## Deployment (Netlify)
 
-1. Create an Azure Static Web App and set the `AZURE_STATIC_WEB_APPS_API_TOKEN` secret in your repository settings.
-2. Push to `main` (or open a pull request). The workflow in `.github/workflows/azure-static-web-app.yml` will:
-   - run the HTML structure tests,
-   - package the static assets in `build/`,
-   - upload the site to Azure.
-3. If you need custom routing, adjust `staticwebapp.config.json` and rerun the workflow.
+Netlify's GitHub integration builds every push:
 
-## Deploying to Netlify via GitHub
+- **Push to `main`** → `npm ci && npm test && npm run build`, then publishes `build/` to production.
+- **Pull request** → a deploy preview URL is posted on the PR.
 
-### One-time setup
+### Domains
 
-1. **Create a Netlify site** – Log in to [app.netlify.com](https://app.netlify.com), click **Add new site → Import an existing project**, and connect your GitHub repository. Netlify will detect [`netlify.toml`](netlify.toml) automatically; no extra UI config is needed.
+`fabriant.cloud` is the primary domain. In Netlify → Domain management, set `fabriant.cloud` as the primary domain and add `fabriant.com` and the other Fabriant domains as domain aliases; `_redirects` then sends them all to `fabriant.cloud`.
 
-### How it works
+### Contact form
 
-Netlify's native GitHub integration handles everything automatically — no GitHub Actions workflow or secrets are required:
+The contact form uses Netlify Forms (form name `contact`). In Netlify → Forms → Form notifications, add an email notification to `contact@fabriant.com`.
 
-- **Push to `main`** → Netlify runs the build command from `netlify.toml` (`npm ci && npm test`, then copies assets to `build/`) and publishes to production.
-- **Pull request** → Netlify automatically deploys a **draft preview** URL and posts it as a commit status check on the PR.
-- SPA fallback redirect, security headers, and asset cache policies are all defined in [`netlify.toml`](netlify.toml).
-
-### Local preview
+### Local preview with Netlify rules
 
 ```bash
 npm install -g netlify-cli
 netlify dev
 ```
-
-This serves the site locally using the same redirect and header rules defined in `netlify.toml`.
