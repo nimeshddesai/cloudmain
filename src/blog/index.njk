@@ -1,0 +1,28 @@
+---
+layout: layouts/base.njk
+title: Blog | Fabriant
+description: Articles from Fabriant on Azure platform engineering, release reliability, security, cost and AI in production.
+permalink: /blog/
+---
+      <section id="blog" class="page-top">
+        <div class="section-header">
+          <h1>Blog</h1>
+          <p>Articles from our work on Azure platform engineering: releases, security, cost and AI in production.</p>
+        </div>
+        {%- if collections.posts and collections.posts.length %}
+        <div class="post-list">
+          {%- for post in collections.posts %}
+          <a class="card card-link post-card" href="{{ post.url }}">
+            <p class="post-meta"><time datetime="{{ post.date | isoDate }}">{{ post.date | readableDate }}</time></p>
+            <h2>{{ post.data.title }}</h2>
+            <p class="card-text">{{ post.data.description }}</p>
+            <span class="post-read">Read article →</span>
+          </a>
+          {%- endfor %}
+        </div>
+        {%- else %}
+        <div class="post-empty">
+          <p>No articles yet. Check back soon.</p>
+        </div>
+        {%- endif %}
+      </section>

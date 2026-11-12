@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const test = require('node:test');
-const { root, page, contains, has } = require('./helpers');
+const { root, buildDir, page, readBuild, contains, has, postUrls } = require('./helpers');
 
 const site = JSON.parse(fs.readFileSync(path.join(root, 'src/_data/site.json'), 'utf8'));
 const offerings = JSON.parse(fs.readFileSync(path.join(root, 'src/_data/offerings.json'), 'utf8'));
@@ -66,8 +66,9 @@ test('about page: how we work, team, backer and values', () => {
 test('faq page', () => {
   const html = page('/faq/');
   has('h1', contains(html, '<h1>Questions we hear</h1>'));
-  has('six questions', (html.match(/<details>/g) || []).length === 6);
+  has('seven questions', (html.match(/<details>/g) || []).length === 7);
   has('pricing answer', contains(html, 'How is a paid sprint priced?'));
+  has('migrations and onboarding answer', contains(html, 'We support Azure migrations and onboarding.'));
 });
 
 test('contact page: Netlify form', () => {
@@ -80,6 +81,43 @@ test('contact page: Netlify form', () => {
   has('topic select', /<select[^>]*id="contact-topic"/i.test(html));
   site.topics.forEach((t) => has(`topic option ${t.slug}`, html.includes(`<option data-slug="${t.slug}">${t.label}</option>`)));
   has('mailbox contact@fabriant.com', /mailto:contact@fabriant\.com/i.test(html));
+  has('status message area', /<div class="form-status" id="form-status" role="alert" hidden><\/div>/.test(html));
+  has('email for the error message', /<form[^>]*data-email="contact@fabriant\.com"/.test(html));
+});
+
+test('contact form shows thanks only after a confirmed submission', () => {
+  const js = readBuild('assets/js/main.js');
+  has('submit handled in script', /form\.addEventListener\("submit"/.test(js) && /event\.preventDefault\(\)/.test(js));
+  has('local preview is not sent', /isLocalPreview/.test(js) && /Not sent: this is a local preview/.test(js));
+  has('response is checked before redirecting', /if \(!response\.ok\) throw/.test(js));
+  has('failure shows an error', /Your message could not be sent/.test(js));
+});
+
+test('blog: list page and published posts', () => {
+  const list = page('/blog/');
+  has('blog h1', contains(list, '<h1>Blog</h1>'));
+  has('draft template is not published', !fs.existsSync(path.join(buildDir, 'blog/example-post')));
+  const posts = postUrls();
+  if (posts.length === 0) {
+    has('empty state when no posts', contains(list, 'No articles yet'));
+    has('no latest-articles section on home', !page('/').includes('id="latest-articles"'));
+    return;
+  }
+  has('no empty state when posts exist', !contains(list, 'No articles yet'));
+  has('latest articles on home', page('/').includes('id="latest-articles"'));
+  const sitemap = readBuild('sitemap.xml');
+  posts.forEach((url) => {
+    const html = readBuild(`${url.slice(1)}index.html`);
+    has(`${url} listed on /blog/`, list.includes(`href="${url}"`));
+    has(`${url} in sitemap`, sitemap.includes(`<loc>https://fabriant.com${url}</loc>`));
+    has(`${url} title`, /<title>[^<]+ \| Fabriant Blog<\/title>/.test(html));
+    has(`${url} description`, /<meta name="description" content="[^"]{20,}"/.test(html));
+    has(`${url} canonical`, html.includes(`<link rel="canonical" href="https://fabriant.com${url}" />`));
+    has(`${url} article og:type`, html.includes('<meta property="og:type" content="article" />'));
+    has(`${url} date`, /<time datetime="\d{4}-\d{2}-\d{2}">/.test(html));
+    has(`${url} back link`, html.includes('href="/blog/"'));
+    has(`${url} not a draft`, !contains(html, 'Draft (not published)'));
+  });
 });
 
 test('thank-you and 404 pages', () => {

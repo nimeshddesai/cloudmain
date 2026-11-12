@@ -35,6 +35,57 @@
     });
   }
 
+  // Contact form: send with fetch and show the thank-you page only after
+  // Netlify confirms the submission. Without JavaScript the form still
+  // posts normally on Netlify.
+  var form = document.getElementById("contact-form");
+  if (form && window.fetch) {
+    var status = document.getElementById("form-status");
+    var button = document.getElementById("contact-submit");
+    var label = button.querySelector(".form-submit-label");
+    var email = form.getAttribute("data-email");
+    var host = window.location.hostname;
+    var isLocalPreview = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(host) || /\.localhost$/.test(host);
+
+    var showStatus = function (kind, message) {
+      status.className = "form-status form-status-" + kind;
+      status.textContent = message;
+      status.hidden = false;
+      status.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    };
+    var setSending = function (sending) {
+      button.disabled = sending;
+      label.textContent = sending ? "Sending…" : "Send message";
+    };
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      status.hidden = true;
+
+      // Netlify Forms only exists on Netlify, so a local preview has nowhere to send to
+      if (isLocalPreview) {
+        showStatus("notice", "Not sent: this is a local preview. The form only sends messages on the live site or a Netlify deploy preview.");
+        return;
+      }
+
+      setSending(true);
+      var thanksUrl = form.getAttribute("action");
+      fetch(thanksUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(new FormData(form)).toString()
+      })
+        .then(function (response) {
+          if (!response.ok) throw new Error("Form submission failed with status " + response.status);
+          window.location.href = thanksUrl;
+        })
+        .catch(function () {
+          setSending(false);
+          showStatus("error", "Your message could not be sent. Please try again, or email us at " + email + ".");
+        });
+    });
+  }
+
   // /contact/?topic=release-reliability pre-selects that topic in the form
   var topicSelect = document.getElementById("contact-topic");
   var topic = new URLSearchParams(window.location.search).get("topic");

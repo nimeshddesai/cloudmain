@@ -15,6 +15,7 @@ const pages = {
   '/how-to-start/': 'how-to-start/index.html',
   '/about/': 'about/index.html',
   '/faq/': 'faq/index.html',
+  '/blog/': 'blog/index.html',
   '/contact/': 'contact/index.html',
   '/contact/thanks/': 'contact/thanks/index.html',
   '/404.html': '404.html'
@@ -38,4 +39,12 @@ const fileForUrl = (url) => {
   return path.join(buildDir, rel);
 };
 
-module.exports = { root, buildDir, pages, noindexPages, readBuild, page, contains, has, fileForUrl };
+// Published blog posts in the build, as URLs like /blog/my-post/
+const postUrls = () => {
+  const dir = path.join(buildDir, 'blog');
+  return fs.readdirSync(dir, { withFileTypes: true })
+    .filter((d) => d.isDirectory() && fs.existsSync(path.join(dir, d.name, 'index.html')))
+    .map((d) => `/blog/${d.name}/`);
+};
+
+module.exports = { root, buildDir, pages, noindexPages, readBuild, page, contains, has, fileForUrl, postUrls };

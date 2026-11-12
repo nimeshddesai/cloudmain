@@ -117,3 +117,24 @@ ogDescription: Safer releases. Stronger controls. Leaner cloud spend. Start with
           </div>
         </div>
       </section>
+
+      {%- if collections.posts and collections.posts.length %}
+      <!-- Latest articles (shown once at least one post is published) -->
+      <section id="latest-articles">
+        <div class="section-header">
+          <h2>Latest articles</h2>
+        </div>
+        <div class="post-list">
+          {%- for post in collections.posts | head(3) %}
+          <a class="card card-link post-card" href="{{ post.url }}">
+            <p class="post-meta"><time datetime="{{ post.date | isoDate }}">{{ post.date | readableDate }}</time></p>
+            <h3>{{ post.data.title }}</h3>
+            <p class="card-text">{{ post.data.description }}</p>
+          </a>
+          {%- endfor %}
+        </div>
+        <div class="section-actions">
+          <a class="cta-secondary" href="/blog/">All articles</a>
+        </div>
+      </section>
+      {%- endif %}

@@ -3,16 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ title }}</title>
+    <title>{{ metaTitle or title }}</title>
     <meta name="description" content="{{ description }}" />
     {%- if noindex %}
     <meta name="robots" content="noindex" />
     {%- else %}
     <link rel="canonical" href="{{ site.url }}{{ page.url }}" />
     {%- endif %}
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content="{{ ogType or 'website' }}" />
     <meta property="og:url" content="{{ site.url }}{{ page.url }}" />
-    <meta property="og:title" content="{{ ogTitle or title }}" />
+    <meta property="og:title" content="{{ ogTitle or metaTitle or title }}" />
     <meta property="og:description" content="{{ ogDescription or description }}" />
     <meta property="og:image" content="{{ site.url }}/images/Fabriant.png" />
     <meta name="twitter:card" content="summary" />

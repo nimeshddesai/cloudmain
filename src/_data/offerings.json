@@ -7,9 +7,7 @@
       "Health-gated, progressive rollouts in Azure DevOps or GitHub Actions",
       "Synthetic checks on critical journeys, such as checkout or login, with automatic rollback",
       "Failed-release and recovery exercises, with runbooks your on-call team can follow"
-    ],
-    "startLabel": "Usually starts with:",
-    "start": "the free Cloud Assessment Sprint, then the Platform Reliability Sprint"
+    ]
   },
   {
     "id": "secure-aks-devsecops",
@@ -19,9 +17,7 @@
       "AKS baseline: identity, network policy, secrets, ingress and upgrade path",
       "Security checks in the pipeline: image scanning, policy as code, signed releases",
       "Defender for Cloud and Azure Policy findings turned into fixes"
-    ],
-    "startLabel": "Usually starts with:",
-    "start": "the free Cloud Assessment Sprint, then the Security and Cost Assessment Sprint or a Platform Reliability Sprint for one AKS workload"
+    ]
   },
   {
     "id": "azure-foundations",
@@ -31,9 +27,7 @@
       "Landing zone review: management groups, subscriptions, identity, networking",
       "Azure Policy, tagging and access governance applied as code",
       "Cost visibility: budgets, anomaly alerts, rightsizing and reservation planning"
-    ],
-    "startLabel": "Usually starts with:",
-    "start": "the free Cloud Assessment Sprint, then the Security and Cost Assessment Sprint"
+    ]
   },
   {
     "id": "ai-production-readiness",
@@ -43,9 +37,7 @@
       "Secure access to Azure OpenAI and model endpoints: private networking, keys and identity",
       "Monitoring, quotas and cost controls for model usage",
       "Release gates and rollback for AI-backed services"
-    ],
-    "startLabel": "Usually starts with:",
-    "start": "the free Cloud Assessment Sprint on the AI workload, then a Platform Reliability Sprint"
+    ]
   },
   {
     "id": "specialist-capacity",
@@ -55,8 +47,6 @@
       "Named, certified Azure engineers working inside your platform team",
       "Day-to-day operations, infrastructure-as-code changes and monitoring within agreed hours",
       "Cost and security hygiene kept current"
-    ],
-    "startLabel": "Usually bought as:",
-    "start": "managed Azure infrastructure and team augmentation"
+    ]
   }
 ]

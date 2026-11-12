@@ -235,13 +235,6 @@
   margin-top: 8px;
 }
 
-.offering-start {
-  margin: auto 0 0;
-  padding-top: 12px;
-  font-size: 13px;
-  color: var(--muted);
-}
-
 /* ---------- Engagements ---------- */
 .engagement {
   display: flex;
@@ -622,6 +615,30 @@
   color: #fff;
 }
 
+.form-submit:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+/* Message shown inside the form when sending fails or on a local preview */
+.form-status {
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.form-status-error {
+  background: #fdecea;
+  color: #8a1c12;
+}
+
+.form-status-notice {
+  background: #fff7e0;
+  color: #6b4a00;
+}
+
 .honeypot {
   position: absolute;
   left: -9999px;
@@ -646,6 +663,168 @@
 .cta-panel p {
   margin: 0 0 18px;
   opacity: 0.92;
+}
+
+/* ---------- Blog ---------- */
+.post-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.post-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.post-card h2,
+.post-card h3 {
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.35;
+  color: var(--azure-dark);
+}
+
+.post-read {
+  margin-top: auto;
+  padding-top: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--azure);
+}
+
+.post-meta {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.post-empty {
+  background: var(--card);
+  border: 1px dashed rgba(15, 108, 189, 0.25);
+  border-radius: 14px;
+  padding: 28px 24px;
+  color: var(--muted);
+  max-width: 720px;
+}
+
+.post-empty p {
+  margin: 0;
+}
+
+/* Centered reading column; same side padding as page sections */
+.post {
+  max-width: 808px;
+  margin: 0 auto;
+  padding: 64px 24px 72px;
+}
+
+.post-back {
+  display: inline-block;
+  margin-bottom: 18px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--azure);
+  text-decoration: none;
+}
+
+.post-back:hover {
+  text-decoration: underline;
+}
+
+.post-header {
+  margin-bottom: 28px;
+}
+
+.post-header h1 {
+  margin: 0 0 10px;
+  font-size: clamp(30px, 2.5vw + 16px, 40px);
+  line-height: 1.15;
+}
+
+.post-draft {
+  color: #9a3412;
+}
+
+/* Article body written in Markdown */
+.prose {
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.prose > * + * {
+  margin-top: 1em;
+}
+
+.prose h2 {
+  margin-top: 1.8em;
+  font-size: 24px;
+  line-height: 1.3;
+}
+
+.prose h3 {
+  margin-top: 1.5em;
+  font-size: 19px;
+}
+
+.prose p,
+.prose ul,
+.prose ol,
+.prose blockquote,
+.prose pre {
+  margin-bottom: 0;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.4em;
+}
+
+.prose li + li {
+  margin-top: 0.35em;
+}
+
+.prose a {
+  color: var(--azure);
+}
+
+.prose code {
+  font-family: "Cascadia Mono", Consolas, ui-monospace, monospace;
+  font-size: 0.88em;
+  background: rgba(15, 108, 189, 0.08);
+  padding: 1px 6px;
+  border-radius: 5px;
+}
+
+.prose pre {
+  overflow-x: auto;
+  background: #0b1b2d;
+  color: #e5edf7;
+  padding: 16px 18px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.prose pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+
+.prose blockquote {
+  margin-left: 0;
+  padding: 4px 0 4px 18px;
+  border-left: 4px solid var(--azure);
+  color: var(--muted);
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
 }
 
 /* ---------- Simple message pages (thank you, 404) ---------- */

@@ -1,0 +1,18 @@
+---
+layout: layouts/base.njk
+ogType: article
+---
+      <article class="post">
+        <a class="post-back" href="/blog/">← All articles</a>
+        <div class="post-header">
+          <h1>{{ title }}</h1>
+          <p class="post-meta">
+            <time datetime="{{ page.date | isoDate }}">{{ page.date | readableDate }}</time>
+            {%- if author %} · {{ author }}{% endif %}
+            {%- if draft %} · <span class="post-draft">Draft (not published)</span>{% endif %}
+          </p>
+        </div>
+        <div class="prose">
+{{ content | safe }}
+        </div>
+      </article>

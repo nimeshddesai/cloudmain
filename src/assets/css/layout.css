@@ -1,7 +1,8 @@
 /* Layout: header and navigation, hero, page grids and footer */
 
 /* ---------- Header ---------- */
-header {
+/* body > header: only the site header, not <header> elements inside page content */
+body > header {
   position: sticky;
   top: 0;
   backdrop-filter: blur(12px);
