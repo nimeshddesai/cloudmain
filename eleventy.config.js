@@ -8,16 +8,16 @@ module.exports = function (eleventyConfig) {
   });
   eleventyConfig.addWatchTarget("src/assets/");
 
-  // Blog dates: "November 12, 2026" for readers, "2026-11-12" for <time datetime>
+  // Article dates: "November 12, 2026" for readers, "2026-11-12" for <time datetime>
   eleventyConfig.addFilter("readableDate", (date) =>
     new Intl.DateTimeFormat("en-US", { dateStyle: "long", timeZone: "UTC" }).format(date));
   eleventyConfig.addFilter("isoDate", (date) => date.toISOString().slice(0, 10));
   eleventyConfig.addFilter("head", (items, n) => items.slice(0, n));
 
-  // Published blog posts, newest first (drafts are left out of production builds)
+  // Published articles, newest first (drafts are left out of production builds)
   eleventyConfig.addCollection("posts", (collectionApi) =>
     collectionApi
-      .getFilteredByGlob("src/blog/posts/*.md")
+      .getFilteredByGlob("src/engineering/posts/*.md")
       .filter((post) => post.data.permalink !== false)
       .sort((a, b) => b.date - a.date));
 

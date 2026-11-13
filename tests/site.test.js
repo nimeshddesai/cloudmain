@@ -42,7 +42,7 @@ test('current page is highlighted in the nav', () => {
   const current = (html) => (html.match(/<a[^>]*href="([^"]+)"[^>]*aria-current="page"/g) || [])
     .map((tag) => tag.match(/href="([^"]+)"/)[1]);
   has('nothing highlighted on home', current(page('/')).length === 0);
-  ['/services/', '/how-to-start/', '/about/', '/blog/', '/contact/'].forEach((url) => {
+  ['/services/', '/how-to-start/', '/about/', '/engineering/', '/contact/'].forEach((url) => {
     const marked = current(page(url));
     has(`only ${url} highlighted on ${url}`, marked.length === 1 && marked[0] === url);
   });
@@ -50,7 +50,7 @@ test('current page is highlighted in the nav', () => {
 
 test('CTA band shows on content pages only', () => {
   const band = (url) => contains(page(url), 'Start with a complimentary 1-week assessment');
-  ['/', '/services/', '/how-to-start/', '/about/', '/faq/', '/blog/'].forEach((url) => has(`CTA band on ${url}`, band(url)));
+  ['/', '/services/', '/how-to-start/', '/about/', '/faq/', '/engineering/'].forEach((url) => has(`CTA band on ${url}`, band(url)));
   ['/contact/', '/contact/thanks/', '/404.html'].forEach((url) => has(`no CTA band on ${url}`, !band(url)));
 });
 
@@ -91,8 +91,8 @@ test('old single-page links are redirected to real pages', () => {
     const hash = m[1].split('#')[1];
     if (hash) has(`#${id} target has #${hash}`, fs.readFileSync(target, 'utf8').includes(`id="${hash}"`));
   });
-  // #overview and #outcomes stay on the home page
-  ['overview', 'outcomes'].forEach((id) => has(`home keeps #${id}`, page('/').includes(`id="${id}"`)));
+  // #overview stays on the home page
+  has('home keeps #overview', page('/').includes('id="overview"'));
 });
 
 test('sitemap and robots.txt', () => {

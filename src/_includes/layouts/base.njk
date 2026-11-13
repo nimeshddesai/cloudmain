@@ -14,7 +14,7 @@
     <meta property="og:url" content="{{ site.url }}{{ page.url }}" />
     <meta property="og:title" content="{{ ogTitle or metaTitle or title }}" />
     <meta property="og:description" content="{{ ogDescription or description }}" />
-    <meta property="og:image" content="{{ site.url }}/images/Fabriant.png" />
+    <meta property="og:image" content="{{ site.url }}{{ image or '/images/Fabriant.png' }}" />
     <meta name="twitter:card" content="summary" />
     <link rel="icon" type="image/x-icon" href="/images/Fabriant.ico" />
     <link rel="stylesheet" href="/assets/css/base.css?v={{ site.assetVersion }}" />

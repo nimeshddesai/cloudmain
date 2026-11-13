@@ -9,13 +9,13 @@ Built with [Eleventy](https://www.11ty.dev/): pages share one layout, so the hea
 
 | URL | Source | Content |
 |---|---|---|
-| `/` | `src/index.njk` | Hero, business problems, services preview, outcomes |
+| `/` | `src/index.njk` | Hero, business problems, services preview, latest articles |
 | `/services/` | `src/services.njk` | The five offerings (from `src/_data/offerings.json`) |
 | `/how-to-start/` | `src/how-to-start.njk` | Engagements and the four-phase process |
 | `/about/` | `src/about.njk` | How we work, team, backer, RITE values |
 | `/faq/` | `src/faq.njk` | Common questions |
-| `/blog/` | `src/blog/index.njk` | List of articles, newest first |
-| `/blog/<name>/` | `src/blog/posts/<name>.md` | One article (Markdown) |
+| `/engineering/` | `src/engineering/index.njk` | List of articles, newest first |
+| `/engineering/<name>/` | `src/engineering/posts/<name>.md` | One article (Markdown) |
 | `/contact/` | `src/contact/index.njk` | Netlify contact form |
 | `/contact/thanks/` | `src/contact/thanks.njk` | Shown after the form is sent (not indexed) |
 | `/404.html` | `src/404.njk` | Not-found page (not indexed) |
@@ -26,8 +26,8 @@ Built with [Eleventy](https://www.11ty.dev/): pages share one layout, so the hea
 src/
   _data/site.json          name, URL, email, nav and footer links, form topics, asset version
   _data/offerings.json     the five offerings (used on Home and Services)
-  _includes/layouts/       base.njk: <head>, header, footer, scripts; post.njk: blog article
-  blog/posts/              blog articles in Markdown (posts.11tydata.js holds shared settings)
+  _includes/layouts/       base.njk: <head>, header, footer, scripts; post.njk: article
+  engineering/posts/       articles in Markdown (posts.11tydata.js holds shared settings)
   _includes/partials/      header, footer, CTA band
   assets/css/              base.css, layout.css, components.css
   assets/js/main.js        menu toggle, contact topic pre-select, old-link redirects
@@ -38,22 +38,35 @@ eleventy.config.js         builds src/ into build/
 tests/                     checks run against the built site in build/
 ```
 
-### Writing a blog article
+### Adding an article
 
-1. Copy `src/blog/posts/example-post.md` and rename it. The file name becomes the URL: `safer-aks-upgrades.md` → `/blog/safer-aks-upgrades/`.
-2. Fill in the details at the top:
+Articles live in `src/engineering/posts/`, one Markdown file each, and are listed at `/engineering/`.
+
+1. **Create a branch:** `git checkout -b article/safer-aks-upgrades`.
+2. **Copy the template:** copy `src/engineering/posts/example-post.md` to a new file. The file name becomes the URL, so use short lowercase words with hyphens: `safer-aks-upgrades.md` → `/engineering/safer-aks-upgrades/`.
+3. **Fill in the details at the top:**
    ```yaml
+   ---
+   draft: true            # keep while writing: visible in npm start, not published
    title: Safer AKS upgrades
-   description: One or two sentences for the blog list and search results.
-   date: 2026-11-20
+   description: One or two sentences for the article list and search results.
+   date: 2026-11-20       # publish date, YYYY-MM-DD; sets the order (newest first)
    author: Nimesh Desai   # optional, defaults to Fabriant
-   draft: true            # optional: visible in npm start, not published
+   ---
    ```
-3. Write the article below the `---` line in Markdown. Use `##` for section headings.
-4. Run `npm start` to preview it at http://localhost:8080/blog/.
-5. Remove `draft: true` to publish. The article then appears on `/blog/`, in the sitemap, and in the "Latest articles" section on the home page (which shows only once at least one article is published).
+4. **Add a main image (optional):** save it in `src/images/posts/`, ideally a JPEG about 1000–1600px wide and under 300 KB, and add to the details at the top:
+   ```yaml
+   image: /images/posts/safer-aks-upgrades.jpg
+   imageAlt: What the image shows, for screen readers
+   imageCaption: Optional caption   # optional
+   ```
+   It appears under the title, is never cropped, and is capped at 440px high. It is also the picture shown when the article is shared on LinkedIn and elsewhere. Don't also put it in the article text.
+5. **Write the article** below the second `---` in Markdown. Use `##` for section headings (the title is already the main heading). For other pictures inside the text, use `![Alt text](/images/posts/name.jpg)`. Paragraphs are justified automatically on screens wider than a phone.
+6. **Preview it:** run `npm start` and open http://localhost:8080/engineering/.
+7. **Publish:** delete the `draft: true` line, then run `npm test`. It checks the article has a title, description, date and working links.
+8. **Ship it:** commit, push and open a pull request. Check the article on the Netlify deploy preview, then merge to `main` to put it live.
 
-`example-post.md` is a draft template and is never published.
+Once published, the article appears on `/engineering/`, in the sitemap, and in "Latest articles" on the home page (that section shows only once at least one article is published). `example-post.md` is a draft template and is never published.
 
 ### Common changes
 

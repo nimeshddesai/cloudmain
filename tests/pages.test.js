@@ -20,7 +20,7 @@ test('home page', () => {
   has('hero headline', contains(html, 'Safer releases. Stronger controls. Leaner cloud spend.'));
   has('free assessment CTA', contains(html, 'Request a free 1-week assessment'));
   has('overview section', /<section[^>]*id="overview"/.test(html));
-  has('outcomes section', /<section[^>]*id="outcomes"/.test(html));
+  has('no outcomes section', !html.includes('id="outcomes"'));
   offerings.forEach((o) => has(`preview links to ${o.id}`, html.includes(`href="/services/#${o.id}"`)));
   has('link to all services', html.includes('href="/services/"'));
 });
@@ -50,7 +50,7 @@ test('how to start page: engagements and process', () => {
 test('about page: how we work, team, backer and values', () => {
   const html = page('/about/');
   has('h1', contains(html, '<h1>One team, working across time zones.</h1>'));
-  has('company intro', contains(html, 'Fabriant is a U.S.-registered company with an engineering team based in Pune, India.'));
+  has('company intro', contains(html, 'Fabriant is a U.S. registered company with an engineering team based in Pune, India.'));
   ['Certified engineers', 'Everything as code', 'Within your standards'].forEach((c) => has(`card ${c}`, contains(html, c)));
   has('co-founder', contains(html, 'Nimesh Desai'));
   has('investor', contains(html, 'Infocusp Innovations'));
@@ -93,10 +93,10 @@ test('contact form shows thanks only after a confirmed submission', () => {
   has('failure shows an error', /Your message could not be sent/.test(js));
 });
 
-test('blog: list page and published posts', () => {
-  const list = page('/blog/');
-  has('blog h1', contains(list, '<h1>Blog</h1>'));
-  has('draft template is not published', !fs.existsSync(path.join(buildDir, 'blog/example-post')));
+test('engineering: list page and published posts', () => {
+  const list = page('/engineering/');
+  has('engineering h1', contains(list, '<h1>Engineering</h1>'));
+  has('draft template is not published', !fs.existsSync(path.join(buildDir, 'engineering/example-post')));
   const posts = postUrls();
   if (posts.length === 0) {
     has('empty state when no posts', contains(list, 'No articles yet'));
@@ -108,15 +108,20 @@ test('blog: list page and published posts', () => {
   const sitemap = readBuild('sitemap.xml');
   posts.forEach((url) => {
     const html = readBuild(`${url.slice(1)}index.html`);
-    has(`${url} listed on /blog/`, list.includes(`href="${url}"`));
+    has(`${url} listed on /engineering/`, list.includes(`href="${url}"`));
     has(`${url} in sitemap`, sitemap.includes(`<loc>https://fabriant.com${url}</loc>`));
-    has(`${url} title`, /<title>[^<]+ \| Fabriant Blog<\/title>/.test(html));
+    has(`${url} title`, /<title>[^<]+ \| Fabriant Engineering<\/title>/.test(html));
     has(`${url} description`, /<meta name="description" content="[^"]{20,}"/.test(html));
     has(`${url} canonical`, html.includes(`<link rel="canonical" href="https://fabriant.com${url}" />`));
     has(`${url} article og:type`, html.includes('<meta property="og:type" content="article" />'));
     has(`${url} date`, /<time datetime="\d{4}-\d{2}-\d{2}">/.test(html));
-    has(`${url} back link`, html.includes('href="/blog/"'));
+    has(`${url} back link`, html.includes('href="/engineering/"'));
     has(`${url} not a draft`, !contains(html, 'Draft (not published)'));
+    const hero = html.match(/<figure class="post-hero">s*<img src="([^"]+)" alt="([^"]*)"/);
+    if (hero) {
+      has(`${url} main image has alt text`, hero[2].trim().length > 0);
+      has(`${url} main image used for sharing`, html.includes(`<meta property="og:image" content="https://fabriant.com${hero[1]}" />`));
+    }
   });
 });
 

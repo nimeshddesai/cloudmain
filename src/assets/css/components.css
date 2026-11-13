@@ -665,7 +665,7 @@
   opacity: 0.92;
 }
 
-/* ---------- Blog ---------- */
+/* ---------- Engineering articles ---------- */
 .post-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -748,6 +748,33 @@
   color: #9a3412;
 }
 
+/* Main image: set with `image` in an article's front matter.
+   Shown whole (never cropped), centred, and capped in height so a
+   square or tall image does not push the text off the screen. */
+.post-hero {
+  margin: 0 0 32px;
+  padding: 0;
+  text-align: center;
+}
+
+.post-hero img {
+  display: block;
+  margin: 0 auto;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: min(440px, 60vh);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(15, 35, 60, 0.14);
+}
+
+.post-hero figcaption,
+.prose figcaption {
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
 /* Article body written in Markdown */
 .prose {
   font-size: 17px;
@@ -756,6 +783,17 @@
 
 .prose > * + * {
   margin-top: 1em;
+}
+
+/* Justified paragraphs. Words are never split with hyphens.
+   Narrow screens keep left-aligned text, where justifying leaves gaps. */
+@media (min-width: 600px) {
+  .prose p,
+  .prose li {
+    text-align: justify;
+    hyphens: manual;
+    -webkit-hyphens: manual;
+  }
 }
 
 .prose h2 {
@@ -821,10 +859,28 @@
   color: var(--muted);
 }
 
+/* Images inside the article text */
 .prose img {
+  display: block;
+  margin: 1.6em auto;
   max-width: 100%;
+  max-height: 520px;
+  width: auto;
   height: auto;
   border-radius: 12px;
+}
+
+.prose p > img:only-child {
+  margin: 0 auto;
+}
+
+.prose figure {
+  margin: 1.6em 0;
+  text-align: center;
+}
+
+.prose figure img {
+  margin: 0 auto;
 }
 
 /* ---------- Simple message pages (thank you, 404) ---------- */

@@ -4,12 +4,12 @@
   "url": "https://fabriant.com",
   "email": "contact@fabriant.com",
   "copyrightYear": "2026",
-  "assetVersion": "9",
+  "assetVersion": "12",
   "nav": [
     { "label": "Services", "url": "/services/" },
     { "label": "How to start", "url": "/how-to-start/" },
     { "label": "About", "url": "/about/" },
-    { "label": "Blog", "url": "/blog/" }
+    { "label": "Engineering", "url": "/engineering/" }
   ],
   "cta": { "label": "Free assessment", "url": "/contact/" },
   "footerLinks": [
@@ -17,7 +17,7 @@
     { "label": "Services", "url": "/services/" },
     { "label": "How to start", "url": "/how-to-start/" },
     { "label": "About", "url": "/about/" },
-    { "label": "Blog", "url": "/blog/" },
+    { "label": "Engineering", "url": "/engineering/" },
     { "label": "FAQ", "url": "/faq/" },
     { "label": "Contact", "url": "/contact/" }
   ],
