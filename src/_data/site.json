@@ -1,0 +1,33 @@
+{
+  "name": "Fabriant",
+  "tagline": "Weaving Intelligence into Cloud",
+  "url": "https://fabriant.com",
+  "email": "contact@fabriant.com",
+  "copyrightYear": "2026",
+  "assetVersion": "12",
+  "nav": [
+    { "label": "Services", "url": "/services/" },
+    { "label": "How to start", "url": "/how-to-start/" },
+    { "label": "About", "url": "/about/" },
+    { "label": "Engineering", "url": "/engineering/" }
+  ],
+  "cta": { "label": "Free assessment", "url": "/contact/" },
+  "footerLinks": [
+    { "label": "Home", "url": "/" },
+    { "label": "Services", "url": "/services/" },
+    { "label": "How to start", "url": "/how-to-start/" },
+    { "label": "About", "url": "/about/" },
+    { "label": "Engineering", "url": "/engineering/" },
+    { "label": "FAQ", "url": "/faq/" },
+    { "label": "Contact", "url": "/contact/" }
+  ],
+  "topics": [
+    { "slug": "free-assessment", "label": "Free cloud assessment" },
+    { "slug": "release-reliability", "label": "Release reliability" },
+    { "slug": "security-and-cost", "label": "Security and cost" },
+    { "slug": "aks-devsecops", "label": "AKS and DevSecOps" },
+    { "slug": "ai-in-production", "label": "AI in production" },
+    { "slug": "extra-engineers", "label": "Extra engineers" },
+    { "slug": "something-else", "label": "Something else" }
+  ]
+}

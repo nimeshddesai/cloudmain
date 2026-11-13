@@ -1,0 +1,19 @@
+# Main site: https://fabriant.com
+# https://fabriant.cloud is an alias used in pitches and external references.
+# It serves the same pages without redirecting; canonical URLs point to fabriant.com.
+
+https://www.fabriant.com/* https://fabriant.com/:splat 301!
+https://www.fabriant.cloud/* https://fabriant.cloud/:splat 301!
+
+# Other domains redirect to the main site
+https://fabriant.ai/* https://fabriant.com/:splat 301!
+https://www.fabriant.ai/* https://fabriant.com/:splat 301!
+
+https://fabriant.in/* https://fabriant.com/:splat 301!
+https://www.fabriant.in/* https://fabriant.com/:splat 301!
+
+https://fabriants.com/* https://fabriant.com/:splat 301!
+https://www.fabriants.com/* https://fabriant.com/:splat 301!
+
+https://fabriant.info/* https://fabriant.com/:splat 301!
+https://www.fabriant.info/* https://fabriant.com/:splat 301!

@@ -1,0 +1,77 @@
+/* Base: design tokens, page background, typography and section spacing */
+
+:root {
+  --azure: #0f6cbd;
+  --azure-dark: #0a4e8c;
+  --background: #f6f8fb;
+  --text: #0f172a;
+  --muted: #4b5563;
+  --card: #ffffff;
+  --accent: #6dd3ff;
+  --shadow: 0 18px 45px rgba(15, 108, 189, 0.12);
+  --border: rgba(15, 108, 189, 0.18);
+  /* sticky header height (one row on all widths; nav switches to hamburger at 1080px) */
+  --header-height: 84px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: radial-gradient(circle at 20% 20%, rgba(109, 211, 255, 0.2), transparent 25%),
+    radial-gradient(circle at 80% 10%, rgba(15, 108, 189, 0.16), transparent 22%),
+    var(--background);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 72px;
+  scroll-margin-top: calc(var(--header-height) + 8px);
+}
+
+/* First section on an inner page sits below the header */
+.page-top {
+  padding-top: 64px;
+}
+
+.section-header {
+  margin-bottom: 28px;
+}
+
+.section-header h1 {
+  margin: 0 0 12px;
+  font-size: clamp(30px, 2.5vw + 16px, 40px);
+  line-height: 1.15;
+}
+
+.section-header h2 {
+  margin: 0 0 10px;
+  font-size: 28px;
+}
+
+.section-header p {
+  margin: 0;
+  color: var(--muted);
+  max-width: 720px;
+}
+
+.section-note {
+  margin: 22px 0 6px;
+  color: var(--text);
+}
+
+.section-actions {
+  margin-top: 22px;
+}
+
+.small-print {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}

@@ -1,16 +1,14 @@
 [build]
   publish = "build"
-  command = "npm ci && npm test && npm run build"
+  # npm test builds the site with Eleventy, then runs the checks against build/
+  command = "npm ci && npm test"
 
 [build.environment]
   NODE_VERSION = "24"
   NODE_ENV     = "development"
 
-# Redirect all routes to index.html (SPA-style fallback)
-[[redirects]]
-  from   = "/*"
-  to     = "/index.html"
-  status = 200
+# No catch-all redirect: each page is its own file, and unknown URLs get 404.html.
+# Domain redirects live in src/_redirects.
 
 # Security and caching headers
 [[headers]]
@@ -21,13 +19,20 @@
     Referrer-Policy        = "strict-origin-when-cross-origin"
     Permissions-Policy     = "camera=(), microphone=(), geolocation=()"
 
+# Pages are always revalidated so content changes show up immediately
 [[headers]]
-  for = "/index.html"
+  for = "/*.html"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
 [[headers]]
-  for = "/styles.css"
+  for = "/*/"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# CSS and JS are versioned with ?v= (assetVersion in src/_data/site.json)
+[[headers]]
+  for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 

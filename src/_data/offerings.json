@@ -1,0 +1,52 @@
+[
+  {
+    "id": "release-reliability",
+    "name": "Release reliability",
+    "value": "Safer changes and faster recovery.",
+    "points": [
+      "Health-gated, progressive rollouts in Azure DevOps or GitHub Actions",
+      "Synthetic checks on critical journeys, such as checkout or login, with automatic rollback",
+      "Failed-release and recovery exercises, with runbooks your on-call team can follow"
+    ]
+  },
+  {
+    "id": "secure-aks-devsecops",
+    "name": "Secure AKS and DevSecOps",
+    "value": "Consistent delivery, stronger controls.",
+    "points": [
+      "AKS baseline: identity, network policy, secrets, ingress and upgrade path",
+      "Security checks in the pipeline: image scanning, policy as code, signed releases",
+      "Defender for Cloud and Azure Policy findings turned into fixes"
+    ]
+  },
+  {
+    "id": "azure-foundations",
+    "name": "Azure foundations",
+    "value": "Faster onboarding, less configuration drift.",
+    "points": [
+      "Landing zone review: management groups, subscriptions, identity, networking",
+      "Azure Policy, tagging and access governance applied as code",
+      "Cost visibility: budgets, anomaly alerts, rightsizing and reservation planning"
+    ]
+  },
+  {
+    "id": "ai-production-readiness",
+    "name": "AI production readiness",
+    "value": "Operational readiness and cost visibility.",
+    "points": [
+      "Secure access to Azure OpenAI and model endpoints: private networking, keys and identity",
+      "Monitoring, quotas and cost controls for model usage",
+      "Release gates and rollback for AI-backed services"
+    ]
+  },
+  {
+    "id": "specialist-capacity",
+    "name": "Specialist capacity",
+    "value": "Added capacity and delivery continuity.",
+    "points": [
+      "Named, certified Azure engineers working inside your platform team",
+      "Day-to-day operations, infrastructure-as-code changes and monitoring within agreed hours",
+      "Cost and security hygiene kept current"
+    ]
+  }
+]

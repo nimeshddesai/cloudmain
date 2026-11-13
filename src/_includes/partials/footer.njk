@@ -1,0 +1,13 @@
+<footer>
+      <nav class="footer-links" aria-label="Footer">
+        {%- for item in site.footerLinks %}
+        <a href="{{ item.url }}">{{ item.label }}</a>
+        {%- endfor %}
+      </nav>
+      <div class="footer-values">
+        Built on <strong>RITE</strong>:
+        <span><em>R</em>eliability</span> · <span><em>I</em>nnovation</span> · <span><em>T</em>rust</span> · <span><em>E</em>xcellence</span>
+      </div>
+      <p>{{ site.name }} · {{ site.tagline }} · <a href="mailto:{{ site.email }}">{{ site.email }}</a></p>
+      <p>&copy; {{ site.copyrightYear }} Fabriant</p>
+    </footer>

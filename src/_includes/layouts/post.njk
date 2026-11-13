@@ -1,0 +1,24 @@
+---
+layout: layouts/base.njk
+ogType: article
+---
+      <article class="post">
+        <a class="post-back" href="/engineering/">← All articles</a>
+        <div class="post-header">
+          <h1>{{ title }}</h1>
+          <p class="post-meta">
+            <time datetime="{{ page.date | isoDate }}">{{ page.date | readableDate }}</time>
+            {%- if author %} · {{ author }}{% endif %}
+            {%- if draft %} · <span class="post-draft">Draft (not published)</span>{% endif %}
+          </p>
+        </div>
+        {%- if image %}
+        <figure class="post-hero">
+          <img src="{{ image }}" alt="{{ imageAlt }}" fetchpriority="high" />
+          {%- if imageCaption %}<figcaption>{{ imageCaption }}</figcaption>{% endif %}
+        </figure>
+        {%- endif %}
+        <div class="prose">
+{{ content | safe }}
+        </div>
+      </article>
