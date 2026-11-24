@@ -17,7 +17,10 @@ const offeringNames = [
 test('home page', () => {
   const html = page('/');
   has('home title', /<title>\s*Fabriant \| Weaving Intelligence into Cloud\s*<\/title>/i.test(html));
-  has('hero headline', contains(html, 'Safer releases. Stronger controls. Leaner cloud spend.'));
+  has('hero headline', contains(html, 'Leave your Azure cloud to us.'));
+  has('hero pitch', contains(html, 'Senior Azure expertise, on demand.'));
+  has('section order: problems, services, why, how to start', ['id="overview"', 'id="services-preview"', 'id="why-fabriant"', 'id="get-started"']
+    .map((id) => html.indexOf(id)).every((pos, i, all) => pos > -1 && (i === 0 || pos > all[i - 1])));
   has('free assessment CTA', contains(html, 'Request a free 1-week assessment'));
   has('overview section', /<section[^>]*id="overview"/.test(html));
   has('no outcomes section', !html.includes('id="outcomes"'));

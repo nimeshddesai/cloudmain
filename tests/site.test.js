@@ -121,3 +121,20 @@ test('netlify has no catch-all rewrite to the home page', () => {
   has('no catch-all redirect', !/\[\[redirects\]\][\s\S]*from\s*=\s*"\/\*"/.test(toml));
   has('404 page built', fs.existsSync(path.join(buildDir, '404.html')));
 });
+
+test('privacy policy and cookie consent', () => {
+  const privacy = page('/privacy/');
+  ['Google Analytics', 'Netlify', 'Your rights', '_ga', site.email].forEach((text) =>
+    has(`privacy policy mentions ${text}`, contains(privacy, text)));
+  urls.forEach((url) => {
+    const html = page(url);
+    has(`${url} footer links the privacy policy`, html.includes('<a href="/privacy/">Privacy policy</a>'));
+    has(`${url} footer has cookie settings`, /data-consent-open/.test(html));
+    has(`${url} consent banner`, html.includes('id="consent-banner"'));
+    // GA must never load straight from the page: main.js adds it only after consent
+    has(`${url} does not load GA before consent`, !html.includes('googletagmanager.com/gtag/js'));
+  });
+  has('contact form links the privacy policy', page('/contact/').includes('class="form-privacy"'));
+  const js = readBuild('assets/js/main.js');
+  has('main.js loads GA only from loadAnalytics', (js.match(/googletagmanager\.com\/gtag\/js/g) || []).length === 1);
+});

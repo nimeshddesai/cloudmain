@@ -1,47 +1,37 @@
 ---
 layout: layouts/base.njk
 title: Fabriant | Weaving Intelligence into Cloud
-ogTitle: Fabriant | Azure platform engineering
-description: Fabriant is a specialist Azure platform-engineering partner. Safer releases, stronger controls and leaner cloud spend, delivered in fixed-scope sprints. Start with a complimentary 1-week cloud assessment.
-ogDescription: Safer releases. Stronger controls. Leaner cloud spend. Start with a complimentary 1-week cloud assessment.
+ogTitle: Fabriant | Leave your Azure to us. Focus on growing your business.
+description: Fabriant runs and improves the Azure platform under your product (releases, security, cost and compliance) so your team can focus on growing the business. Certified engineers, fixed-scope sprints, and a free 1-week cloud assessment to start.
+ogDescription: Senior Azure expertise, on demand. Microsoft-certified engineers, fixed-scope sprints and a complimentary 1-week assessment to start.
 ---
-      <!-- Hero -->
-      <section class="hero">
+      <!-- Hero: what we do, in one line -->
+      <section class="hero hero-solo">
         <div>
-          <div class="badge">Azure platform engineering</div>
-          <h1>Safer releases. Stronger controls. Leaner cloud spend.</h1>
-          <p>
-            Fabriant is a specialist Azure platform-engineering partner. We fix the release, security and cost problems in your Azure estate, in fixed-scope sprints, and hand the work back to your team.
+          <div class="badge">Azure platform engineering · Microsoft AI Cloud Partner</div>
+          <h1>Leave your Azure cloud to us. <span class="hero-accent">Focus on growing your business.</span></h1>
+          <p class="hero-lead">
+            Fabriant takes care of the Azure platform under your product: safe releases, strong security, a lower bill and audit-ready controls. Your team stays on the features your customers pay for.
           </p>
+          <p class="hero-pitch"><strong>Senior Azure expertise, on demand.</strong> Microsoft-certified engineers who work as an extension of your team, with an agreed scope and clear outcomes. Start with a complimentary one-week assessment.</p>
           <div class="hero-actions">
-            <a class="cta" href="/contact/?topic=free-assessment">Request a free 1-week assessment</a>
-            <a class="cta-secondary" href="/how-to-start/">See how to start</a>
+            <a class="cta" href="/contact/?topic=free-assessment">Get your free 1-week assessment</a>
+            <a class="cta-secondary" href="#services-preview">See what we do</a>
           </div>
           <ul class="proof-strip">
-            <li>Complimentary 1-week assessment</li>
-            <li>Fixed-scope sprints</li>
+            <li>Member of the Microsoft AI Cloud Partner Program</li>
             <li>Microsoft-certified engineers (AZ-305, AZ-104)</li>
+            <li>Fixed-scope sprints</li>
             <li>One team across time zones</li>
-          </ul>
-        </div>
-        <div class="hero-card">
-          <div class="hero-card-label">Start here · Complimentary</div>
-          <h3>Cloud Assessment Sprint</h3>
-          <p class="hero-card-sub">One week. Read-only access. No fee, no obligation.</p>
-          <ul class="list">
-            <li><span class="dot"></span>One subscription or priority workload</li>
-            <li><span class="dot"></span>Reliability, security and cost hotspots</li>
-            <li><span class="dot"></span>Executive readout and quick wins</li>
-            <li><span class="dot"></span>A recommended next step</li>
           </ul>
         </div>
       </section>
 
-      <!-- Overview -->
+      <!-- Why: the problems we take off your plate -->
       <section id="overview">
         <div class="section-header">
           <h2>Azure problems are business problems</h2>
-          <p>A failed release costs revenue. An unexplained bill costs margin. A weak control costs you the audit. We work on the Azure platform underneath your product so those stop happening.</p>
+          <p>A failed release costs revenue. An unexplained bill costs margin. A weak control costs you the audit. We take care of the Azure platform underneath your product so those stop happening.</p>
         </div>
         <div class="cards cards-4">
           <div class="card">
@@ -61,6 +51,56 @@ ogDescription: Safer releases. Stronger controls. Leaner cloud spend. Start with
             <p class="card-text">Certified engineers who join your team and work to your backlog.</p>
           </div>
         </div>
+      </section>
+
+      <!-- What: services in detail -->
+      <section id="services-preview">
+        <div class="section-header">
+          <h2>What we do</h2>
+          <p>Five ways we help, each tied to a problem your business already feels.</p>
+        </div>
+        <div class="cards offering-cards">
+          {%- for offering in offerings %}
+          <div class="card offering">
+            <h3><a href="/services/#{{ offering.id }}">{{ offering.name }}</a></h3>
+            <p class="offering-value">{{ offering.value }}</p>
+            <ul class="list">
+              {%- for point in offering.points %}
+              <li><span class="dot"></span>{{ point }}</li>
+              {%- endfor %}
+            </ul>
+          </div>
+          {%- endfor %}
+        </div>
+        <div class="section-actions">
+          <a class="cta-secondary" href="/services/">See all services</a>
+        </div>
+      </section>
+
+      <!-- Who, where, when: why Fabriant -->
+      <section id="why-fabriant">
+        <div class="section-header">
+          <h2>Why teams choose Fabriant</h2>
+          <p>Senior Azure engineering when you need it, without the cost and delay of building a platform team.</p>
+        </div>
+        <div class="cards cards-4">
+          <div class="card">
+            <h3>Fixed scope, fixed outcome</h3>
+            <p class="card-text">Every sprint has an agreed scope, a set duration and evidence that it worked. No open-ended billing.</p>
+          </div>
+          <div class="card">
+            <h3>Yours to keep</h3>
+            <p class="card-text">Everything is built as code in your repositories and your Azure tenant, with runbooks and a handover to your team.</p>
+          </div>
+          <div class="card">
+            <h3>Certified and recognized</h3>
+            <p class="card-text">Microsoft-certified engineers and a member of the Microsoft AI Cloud Partner Program.</p>
+          </div>
+          <div class="card">
+            <h3>Work moves while you sleep</h3>
+            <p class="card-text">A U.S. registered company with engineers in Pune, India, so work continues across time zones with daily overlap.</p>
+          </div>
+        </div>
         <div class="segments">
           <div class="segment">
             <h3>Growing software companies</h3>
@@ -73,22 +113,42 @@ ogDescription: Safer releases. Stronger controls. Leaner cloud spend. Start with
         </div>
       </section>
 
-      <!-- Services preview -->
-      <section id="services-preview">
+      <!-- How: getting started -->
+      <section id="get-started">
         <div class="section-header">
-          <h2>What we do</h2>
-          <p>Five ways we help, each tied to a problem your business already feels.</p>
+          <h2>How to start</h2>
+          <p>Most clients begin with a free one-week assessment. You can be up and running within days.</p>
         </div>
-        <div class="cards cards-5">
-          {%- for offering in offerings %}
-          <a class="card card-link" href="/services/#{{ offering.id }}">
-            <h3>{{ offering.name }}</h3>
-            <p class="card-text">{{ offering.value }}</p>
-          </a>
-          {%- endfor %}
+        <div class="start-layout">
+          <div class="grid process">
+            <div class="step">
+              <h4>Talk to us</h4>
+              <p>A 30-minute call about your Azure setup and what is getting in the way.</p>
+            </div>
+            <div class="step">
+              <h4>Free assessment</h4>
+              <p>One week, read-only access. We find the reliability, security and cost hotspots.</p>
+            </div>
+            <div class="step">
+              <h4>Fix and hand over</h4>
+              <p>A fixed-scope sprint or ongoing engineers, ending with work your team owns.</p>
+            </div>
+          </div>
+          <div class="hero-card">
+            <div class="hero-card-label">Start here · Complimentary</div>
+            <h3>Cloud Assessment Sprint</h3>
+            <p class="hero-card-sub">One week. Read-only access. No fee, no obligation.</p>
+            <ul class="list">
+              <li><span class="dot"></span>One subscription or priority workload</li>
+              <li><span class="dot"></span>Reliability, security and cost hotspots</li>
+              <li><span class="dot"></span>Executive readout and quick wins</li>
+              <li><span class="dot"></span>A recommended next step</li>
+            </ul>
+            <a class="cta start-cta" href="/contact/?topic=free-assessment">Request your free assessment</a>
+          </div>
         </div>
         <div class="section-actions">
-          <a class="cta-secondary" href="/services/">See all services</a>
+          <a class="cta-secondary" href="/how-to-start/">See all ways to engage</a>
         </div>
       </section>
 

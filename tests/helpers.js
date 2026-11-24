@@ -18,6 +18,7 @@ const pages = {
   '/engineering/': 'engineering/index.html',
   '/contact/': 'contact/index.html',
   '/contact/thanks/': 'contact/thanks/index.html',
+  '/privacy/': 'privacy/index.html',
   '/404.html': '404.html'
 };
 const noindexPages = ['/contact/thanks/', '/404.html'];
