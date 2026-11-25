@@ -138,3 +138,12 @@ test('privacy policy and cookie consent', () => {
   const js = readBuild('assets/js/main.js');
   has('main.js loads GA only from loadAnalytics', (js.match(/googletagmanager\.com\/gtag\/js/g) || []).length === 1);
 });
+
+test('Microsoft partnership shown without the Microsoft logo', () => {
+  ['/', '/about/'].forEach((url) => {
+    const html = page(url);
+    has(`${url} partnership strip`, html.includes('class="partner-strip"'));
+    has(`${url} partnership wording`, contains(html, 'Member of the Microsoft AI Cloud Partner Program'));
+  });
+  urls.forEach((url) => has(`${url} trademark notice`, contains(page(url), 'trademarks of the Microsoft group of companies')));
+});

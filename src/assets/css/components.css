@@ -1048,3 +1048,65 @@
 .consent-actions .cta {
   border: none;
 }
+
+/* ---------- Microsoft partnership strip ---------- */
+.partner-section {
+  padding-bottom: 56px;
+}
+
+.partner-strip {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 22px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 14px 32px rgba(15, 108, 189, 0.08);
+}
+
+#model .partner-strip {
+  margin-top: 22px;
+}
+
+.partner-badge {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(15, 108, 189, 0.1);
+  color: var(--azure);
+}
+
+.partner-badge-img {
+  flex-shrink: 0;
+  height: 64px;
+  width: auto;
+}
+
+.partner-text p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.partner-text .partner-title {
+  margin-bottom: 2px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+@media (max-width: 520px) {
+  .partner-strip {
+    align-items: flex-start;
+  }
+}
+
+.footer-trademark {
+  font-size: 12px;
+  opacity: 0.8;
+}
