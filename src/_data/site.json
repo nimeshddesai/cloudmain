@@ -4,7 +4,9 @@
   "url": "https://fabriant.com",
   "email": "contact@fabriant.com",
   "copyrightYear": "2026",
-  "assetVersion": "12",
+  "assetVersion": "16",
+  "gaMeasurementId": "G-Q11GV5QG9N",
+  "microsoftPartnerBadge": "",
   "nav": [
     { "label": "Services", "url": "/services/" },
     { "label": "How to start", "url": "/how-to-start/" },

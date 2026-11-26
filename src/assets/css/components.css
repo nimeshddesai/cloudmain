@@ -220,6 +220,16 @@
   scroll-margin-top: calc(var(--header-height) + 8px);
 }
 
+.offering h3 a {
+  color: var(--azure-dark);
+  text-decoration: none;
+}
+
+.offering h3 a:hover,
+.offering h3 a:focus-visible {
+  text-decoration: underline;
+}
+
 .offering-value {
   margin: 0;
   color: var(--azure);
@@ -286,6 +296,38 @@
   border: 2px solid var(--azure);
   background: linear-gradient(180deg, #ffffff, #eef6ff);
   box-shadow: var(--shadow);
+}
+
+/* ---------- Callout (highlighted note with an action) ---------- */
+.callout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 24px;
+  margin: 28px 0 18px;
+  padding: 22px 26px;
+  border: 2px solid var(--azure);
+  border-left-width: 6px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #ffffff, #e8f3ff);
+  box-shadow: var(--shadow);
+}
+
+.callout h3 {
+  margin: 0 0 4px;
+  font-size: 21px;
+  color: var(--azure-dark);
+}
+
+.callout p {
+  margin: 0;
+  font-size: 17px;
+  color: var(--text);
+}
+
+.callout .cta {
+  flex-shrink: 0;
 }
 
 /* ---------- Process steps ---------- */
@@ -895,4 +937,176 @@
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 24px;
+}
+
+/* ---------- Privacy policy ---------- */
+.legal .prose p,
+.legal .prose li {
+  text-align: left;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.legal table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.legal th,
+.legal td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.legal th {
+  color: var(--azure-dark);
+}
+
+.form-privacy {
+  margin: 14px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* A button that looks like a text link (Cookie settings) */
+.link-button {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.prose .link-button {
+  color: var(--azure);
+}
+
+/* ---------- Cookie consent banner ---------- */
+.consent-banner {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 100;
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 24px;
+  padding: 18px 22px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 18px 50px rgba(11, 27, 45, 0.25);
+}
+
+.consent-banner[hidden] {
+  display: none;
+}
+
+.consent-text {
+  flex: 1 1 360px;
+}
+
+.consent-text p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.consent-text .consent-title {
+  margin-bottom: 2px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.consent-text a {
+  color: var(--azure);
+}
+
+.consent-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.consent-actions button {
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.consent-actions .cta {
+  border: none;
+}
+
+/* ---------- Microsoft partnership strip ---------- */
+.partner-section {
+  padding-bottom: 56px;
+}
+
+.partner-strip {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 22px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 14px 32px rgba(15, 108, 189, 0.08);
+}
+
+#model .partner-strip {
+  margin-top: 22px;
+}
+
+.partner-badge {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(15, 108, 189, 0.1);
+  color: var(--azure);
+}
+
+.partner-badge-img {
+  flex-shrink: 0;
+  height: 64px;
+  width: auto;
+}
+
+.partner-text p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.partner-text .partner-title {
+  margin-bottom: 2px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+@media (max-width: 520px) {
+  .partner-strip {
+    align-items: flex-start;
+  }
+}
+
+.footer-trademark {
+  font-size: 12px;
+  opacity: 0.8;
 }

@@ -1,0 +1,17 @@
+{#- Microsoft partnership. Microsoft's trademark rules do not allow the Microsoft
+    corporate logo here. If Partner Center's Logo Builder offers Fabriant an official
+    partner badge, save it under src/images/ and set site.microsoftPartnerBadge to its
+    path; it then replaces the text badge below, unaltered. -#}
+<div class="partner-strip" aria-label="Microsoft partnership">
+          {%- if site.microsoftPartnerBadge %}
+          <img class="partner-badge-img" src="{{ site.microsoftPartnerBadge }}" alt="Microsoft AI Cloud Partner Program badge" />
+          {%- else %}
+          <div class="partner-badge" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6l7-3z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          {%- endif %}
+          <div class="partner-text">
+            <p class="partner-title">Member of the Microsoft AI Cloud Partner Program</p>
+            <p>We are a registered Microsoft partner, and our engineers are Microsoft-certified on Azure.</p>
+          </div>
+        </div>

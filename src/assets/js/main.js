@@ -86,6 +86,95 @@
     });
   }
 
+  // Cookie consent. Google Analytics is loaded only after the visitor accepts.
+  // The choice is kept in localStorage (not a cookie) and asked again after a year.
+  var gaMeta = document.querySelector('meta[name="ga-measurement-id"]');
+  var gaId = gaMeta ? gaMeta.getAttribute("content") : "";
+  var banner = document.getElementById("consent-banner");
+  var CONSENT_KEY = "fabriant-analytics-consent";
+  var CONSENT_MAX_AGE = 365 * 24 * 60 * 60 * 1000;
+  var gaLoaded = false;
+
+  var readConsent = function () {
+    try {
+      var saved = JSON.parse(window.localStorage.getItem(CONSENT_KEY));
+      if (saved && (saved.value === "granted" || saved.value === "denied") && Date.now() - saved.time < CONSENT_MAX_AGE) {
+        return saved.value;
+      }
+    } catch (e) {}
+    return null;
+  };
+  var saveConsent = function (value) {
+    try {
+      window.localStorage.setItem(CONSENT_KEY, JSON.stringify({ value: value, time: Date.now() }));
+    } catch (e) {}
+  };
+
+  var loadAnalytics = function () {
+    if (!gaId || gaLoaded || typeof window.gtag !== "function") return;
+    gaLoaded = true;
+    window.gtag("consent", "update", { analytics_storage: "granted" });
+    var script = document.createElement("script");
+    script.async = true;
+    script.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(gaId);
+    document.head.appendChild(script);
+    window.gtag("js", new Date());
+    window.gtag("config", gaId);
+  };
+
+  // Withdrawing consent: stop analytics and remove its cookies
+  var removeAnalyticsCookies = function () {
+    var domains = ["", window.location.hostname, "." + window.location.hostname.replace(/^www\./, "")];
+    document.cookie.split(";").forEach(function (cookie) {
+      var name = cookie.split("=")[0].trim();
+      if (name === "_ga" || name.indexOf("_ga_") === 0) {
+        domains.forEach(function (domain) {
+          document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/" + (domain ? "; domain=" + domain : "");
+        });
+      }
+    });
+  };
+
+  var showBanner = function () {
+    if (!banner) return;
+    banner.hidden = false;
+    var focusTarget = banner.querySelector('[data-consent="granted"]');
+    if (focusTarget) focusTarget.focus({ preventScroll: true });
+  };
+
+  if (banner) {
+    banner.querySelectorAll("[data-consent]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var value = button.getAttribute("data-consent");
+        var wasLoaded = gaLoaded;
+        saveConsent(value);
+        banner.hidden = true;
+        if (value === "granted") {
+          loadAnalytics();
+        } else if (wasLoaded) {
+          window.gtag("consent", "update", { analytics_storage: "denied" });
+          removeAnalyticsCookies();
+          window.location.reload();
+        } else {
+          removeAnalyticsCookies();
+        }
+      });
+    });
+  }
+  document.querySelectorAll("[data-consent-open]").forEach(function (link) {
+    link.addEventListener("click", function (event) {
+      event.preventDefault();
+      showBanner();
+    });
+  });
+
+  var consent = readConsent();
+  if (consent === "granted") {
+    loadAnalytics();
+  } else if (consent === null && gaId) {
+    showBanner();
+  }
+
   // /contact/?topic=release-reliability pre-selects that topic in the form
   var topicSelect = document.getElementById("contact-topic");
   var topic = new URLSearchParams(window.location.search).get("topic");

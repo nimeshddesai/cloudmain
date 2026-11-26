@@ -21,6 +21,21 @@
     <link rel="stylesheet" href="/assets/css/layout.css?v={{ site.assetVersion }}" />
     <link rel="stylesheet" href="/assets/css/components.css?v={{ site.assetVersion }}" />
     <script src="/assets/js/main.js?v={{ site.assetVersion }}" defer></script>
+    {%- if site.gaMeasurementId and site.gaMeasurementId != "G-XXXXXXXXXX" %}
+    <!-- Google Analytics (GA4): consent mode defaults to denied. main.js loads
+         the tag only after the visitor accepts analytics in the consent banner. -->
+    <meta name="ga-measurement-id" content="{{ site.gaMeasurementId }}" />
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied'
+      });
+    </script>
+    {%- endif %}
   </head>
   <body>
     {% include "partials/header.njk" %}
@@ -33,5 +48,6 @@
     </main>
 
     {% include "partials/footer.njk" %}
+    {% include "partials/consent-banner.njk" %}
   </body>
 </html>

@@ -170,6 +170,63 @@ header nav {
   margin-bottom: 22px;
 }
 
+/* Single-column hero: the value statement is the first thing on the page */
+.hero-solo {
+  grid-template-columns: minmax(0, 900px);
+  padding-top: 88px;
+}
+
+.hero-solo h1 {
+  font-size: clamp(34px, 4.4vw + 10px, 60px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.hero-accent {
+  display: block;
+  color: var(--azure);
+}
+
+.hero .hero-lead {
+  font-size: 19px;
+  max-width: 760px;
+  margin-bottom: 16px;
+}
+
+.hero .hero-pitch {
+  color: var(--text);
+  font-size: 17px;
+  max-width: 760px;
+  padding: 14px 18px;
+  border-left: 4px solid var(--azure);
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 0 12px 12px 0;
+}
+
+/* Home page "How to start": steps beside the assessment card */
+.start-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.start-layout .process {
+  grid-template-columns: 1fr;
+}
+
+.start-cta {
+  margin-top: 16px;
+  justify-content: center;
+  width: 100%;
+}
+
+@media (max-width: 820px) {
+  .start-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ---------- Grids ---------- */
 .cards {
   display: grid;
